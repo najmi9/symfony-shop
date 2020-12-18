@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} Cart of Products{% endblock %}
+
+{% block body %}
+	<div class="container">
+		<table class="table">
+  <thead>
+    <tr>  
+      <th scope="col">Image</th>
+      <th scope="col">Name</th>
+      <th scope="col">Price</th>
+      <th scope="col">Quantity</th>
+      <th scope="col"> total </th>
+      <th scope="col">Actions</th>
+    </tr>
+  </thead> 
+  <tbody>
+   	{% for product in products %}
+   		<tr>
+      		<td> <img src="{{ product.image }}" width="50" height="50"> </td>
+      		<th> {{ product.name }} </th>
+      		<td>{{ product.price|format_number }} $</td>
+      		<td> {{ cart[product.id] }} </td>
+      		<td> {{ (cart[product.id] * product.price)|format_number }} $</td>
+          <td>
+                <a href="{{ path('cart_delete', {'id': product.id}) }}" class="btn btn-sm btn-danger">
+                    <i class="fas fa-trash"></i>  
+                </a>
+
+                <a href="{{ path('cart_add_product', {'product': product.id} ) }}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-plus"></i>  
+                </a>
+          </td>
+    	</tr>
+    {% else %}
+        <tr><td class="text-center" colspan="6">There is no products added to your cart.</td></tr>
+   	{% endfor %}
+  </tbody>
+  <footer>
+  	<tr>
+  		<td class="text-right" colspan="3">Total : </td>
+  		<td class="text-success"> {{ total|format_number }} $</td>
+  		<td> 
+  		  <a href="{{ path("paypal_send_payment", {'total': total}) }}" class="btn btn-sm btn-primary">
+            <i class="fas fa-money-bill-wave"></i>Payer  
+        </a>
+        </td>
+  	</tr>
+  </footer>
+</table>
+	</div>
+{% endblock %}

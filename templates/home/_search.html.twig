@@ -1,0 +1,31 @@
+
+    <h4>Search : </h4>
+            <form method="get" action="{{ path('search') }}">
+               <label class="sr-only" for="inlineFormInputGroupUsername2">Search</label>
+  <div class="input-group mb-2 mr-sm-2">
+    <div class="input-group-prepend">
+      <div class="input-group-text"><i class="fas fa-search"></i></div>
+    </div>
+        <input type="text" name="q" value="{{ app.request.query.get('q') }}" class="form-control" id="inlineFormInputGroupUsername2" placeholder="Search">
+  </div>
+    <h5 class="text-left text-primary">Price: </h5>
+    <div class="form-group">
+       Min price : <input class="form-control" value="{{ app.request.query.get('min') }}" type="number" name="min"> <br />
+       Max price : <input class="form-control" value="{{ app.request.query.get('max') }}" type="number" name="max"><br />
+    </div>
+
+    <h5 class="text-left text-primary"> Categories: </h5>
+        {% for c  in categories %}
+            <div class="form-check">
+  <input class="form-check-input" type="checkbox"  name="{{'categories['~loop.index~'])'}}" value="{{ c.id }}" id="{{c.id}}">
+  <label class="form-check-label" for="{{c.id}}">
+   {{ c.title }}
+  </label>
+</div>
+        {% endfor %}
+    
+   
+  <button type="submit" class="btn btn-success btn-block mt-2"> search </button>
+            </form>
+
+

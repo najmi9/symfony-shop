@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD"> // Replace YOUR_SB_CLIENT_ID with your sandbox client ID
+</script>
+
+<div class="container bg-light">
+    <h1 class="text-center border-bottom mb-2"> 
+        Payment of 
+        <span class="text-primary font-weight-bolder">
+            {{ total|format_number() }} $
+        </span> 
+     </h1>
+    <div class="text-center" id="paypal-button-container"></div>
+</div>
+
+
+<!-- Add the checkout buttons, set up the order and approve the order -->
+<script>
+    paypal.Buttons({
+        style: {
+            layout: 'vertical',
+            color: 'blue',
+            shape: 'rect',
+            label: 'paypal',
+            size: 'responsive'
+        },
+        createOrder: function () {
+            return fetch('/paypal/create-order', {
+                method: 'post',
+                headers: {
+                    'content-type': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(res => res.id);
+        },
+
+        onApprove: function (data, actions) {
+            fetch("/paypal/capture-payment", {
+                headers:{
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                method: 'POST',
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(res=> {
+                alert("Payment successful")
+            });
+        },
+        onCancel: function (data) {
+            console.log(data);
+        },
+        onError: function (err) {
+            console.log("errors", err)
+        }
+    }).render('#paypal-button-container'); // Display payment options on your web page
+</script>
+{% endblock %}
