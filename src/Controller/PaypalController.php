@@ -32,49 +32,69 @@ class PaypalController extends AbstractController
     /**
      * @Route("/send-payment/{total}", name="send_payment", methods={"GET"})
      */
-    public function pay(string $total): Response
+    public function pay(string $total, SessionInterface $session): Response
     {
 
         if ($total<=0) {
             $this->addFlash("warning", "Total should not be negative or null.");
             return $this->redirectToRoute('cart');
         }
+        $shippingPrice = ProjectConstants::SHIPPING_PRICE;
 
-        return $this->render('paypal/pay.html.twig', compact('total'));
+        $handlingPrice = ProjectConstants::HANDLINH_PRICE;
+        $total = $total + $shippingPrice + $handlingPrice;
+
+        // update the value of the number of product in the cart icon (in the navbar)
+        $items = 0;
+        foreach ($session->get('cart', []) as $key => $value) {
+            $items += $value;
+        }
+
+
+        return $this->render('paypal/pay.html.twig', compact('total', 'items'));
     }
-
 
     /**
      * @Route("/cancel", name="paypal_cancel",  methods={"POST"})
      */
-    public function cancelPayment(Request $request)
+    public function onCancel(Request $request)
     {
-        dd($request);
+        // logic to do after the cancling the error
     }
 
     /**
      * @Route("/error", name="paypal_error", methods={"POST"})
      */
-    public function error(Request $request, EntityManagerInterface $em)
+    public function onError(Request $request)
     {
+        // logic to do if there an error.
+    }
 
-       /*
+    /**
+     * @Route("/paypal-return", name="return_url") 
+     */
+    public function returnAfterPayment(Request $request): Response
+    {
         $payerId = $request->query->get('PayerID');
         $token = $request->query->get('token');
 
-        $payment = new Payment();
+        // logic afetr the user approe the payment.
+        $this->addFlash('success', 'Thank you for your payment');
 
-        $payment->setUser($this->getUser())
-            ->setToken($token)
-            ->setPayeerId($payerId)
-            ->setCreatedAt(new \DateTime())
-            ->setUpdatedAt(new \DateTime())
-            ->setStatus('NOT APPROVED');
-        $em->persist($payment);
-        $em->flush();
+        return $this->redirectToRoute('home');
+    }
 
-        return new Response('Thank you for your payment !');
-        */
+    /**
+     * @Route("/paypal-cancel", name="cancel_url") 
+     */
+    public function canceledPayment(Request $request): Response
+    {
+        $token = $request->query->get('token');
+        // logic to do after the user cancel the payment
+
+        $this->addFlash('danger', 'payment Canceled');
+
+        return $this->redirectToRoute('home');
     }
 
     /**
@@ -90,6 +110,8 @@ class PaypalController extends AbstractController
 
         $result = json_decode($request->getContent(), true);
 
+        /*https://localhost:8000/paypal/paypal-return?token=71Y009370T9939603&PayerID=KJB7KJ8TL5RAG*/
+
         // Here, OrdersCaptureRequest() creates a POST request to /v2/checkout/orders
         // $response->result->id gives the orderId of the order created above
         /** @var Order $order */
@@ -102,13 +124,7 @@ class PaypalController extends AbstractController
         $response = $client->execute($request);
 
         // If call returns body in response, you can get the deserialized version from the result attribute of the response
-        $order->setUpdatedAt(new \DateTime())
-            ->setStatus('CAPTURED')
-            ->setFacilitatorAccessToken($result['facilitatorAccessToken'])
-            ->setPayeerId($result['payerID'])
-            ->setPaymentId($result['paymentID'])
-            ->setBillingToken($result['billingToken'])
-        ;
+        $order = $this->updateOrder($order, $result);
 
         $em->persist($order);
         $em->flush();
@@ -121,7 +137,7 @@ class PaypalController extends AbstractController
     }
 
     /**
-     * @Route("/create-order", name="create_order", methods={"POST", "GET"})
+     * @Route("/create-order", name="create_order", methods={"POST"})
      */
     public function createOrder(SessionInterface $session, CreateOrderService $createOrder, EntityManagerInterface $em, ProductRepository $productRepo): JsonResponse
     {
@@ -131,17 +147,17 @@ class PaypalController extends AbstractController
 
         $cart = $session->get('cart', []);
 
-        $products = $productRepo->findById(array_keys($cart));
+        $products = $productRepo->findProductsById(array_keys($cart));
 
         $subtotal = 0;
 
         $items = [];
         foreach ($products as $product) {
-            $subtotal += round($product->getPrice()) * $cart[$product->getId()];
+            $subtotal += round($product->getPrice()) * $cart[$product->getId()->__toString()];
             $items[]= [
                 'name' => $product->getName(),
                 'description' => $product->getCategory()->getTitle(),
-                'quantity' => (string) $cart[$product->getId()],
+                'quantity' => (string) $cart[$product->getId()->__toString()],
                 'unit_amount' => [
                     'currency_code' => 'USD',
                     'value' =>  (string) round($product->getPrice()),
@@ -188,5 +204,17 @@ class PaypalController extends AbstractController
         $em->persist($order);
         $em->flush();
         return $this->json(['id' => $response->result->id]);
+    }
+
+    private function updateOrder(Order $order, array $result): Order
+    {
+        $order->setUpdatedAt(new \DateTime())
+            ->setStatus('CAPTURED')
+            ->setFacilitatorAccessToken($result['facilitatorAccessToken'] ?? '')
+            ->setPayeerId($result['payerID'])
+            ->setPaymentId($result['paymentID'])
+            ->setBillingToken($result['billingToken'] ?? '')
+        ;
+        return $order;
     }
 }

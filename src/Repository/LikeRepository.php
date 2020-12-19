@@ -19,14 +19,14 @@ class LikeRepository extends ServiceEntityRepository
         parent::__construct($registry, Like::class);
     }
 
-    public function findOneByUserAndProduct(int $userId, int $productId): ?Like
+    public function findOneByUserAndProduct(int $userId, string $productId): ?Like
     {
          return $this->createQueryBuilder('l')
             ->join('l.product', 'p')
             ->join('l.user', 'u')
             ->andWhere('p = :productId')
             ->andWhere('u = :userId')
-            ->setParameter('productId', $productId)
+            ->setParameter('productId', $productId, 'uuid')
             ->setParameter('userId', $userId)
             ->getQuery()
             ->getOneOrNullResult()

@@ -32,8 +32,8 @@ class AppFixtures extends Fixture
             $id  = random_int(10, 99);
             $image = "https://picsum.photos/id/$id/300/300";
             $product->setName($faker->productName())
-                    ->setDescription($faker->paragraph(5))
-                    ->setPrice($faker->randomFloat(1000, 10000))
+                    ->setDescription($faker->paragraph(2))
+                    ->setPrice($faker->randomFloat(10, 500))
                     ->setImage($image)
                     ->setCategory($faker->randomElement($categories))
             ;

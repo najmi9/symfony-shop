@@ -6,9 +6,17 @@ namespace App\Service\Paypal;
 
 use PayPalCheckoutSdk\Core\PayPalHttpClient;
 use PayPalCheckoutSdk\Orders\OrdersCreateRequest;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class CreateOrderService
 {
+    private UrlGeneratorInterface $urlGenerator;
+
+    public function __construct(UrlGeneratorInterface $urlGenerator)
+    {
+        $this->urlGenerator = $urlGenerator;
+    }
+
     /**
      * Setting up the JSON request body for creating the Order. The Intent in the
      * request body should be set as "CAPTURE" for capture intent flow.
@@ -28,7 +36,9 @@ class CreateOrderService
             'intent' => 'CAPTURE',
             'application_context' =>
                 [
-                    'brand_name' => 'EXAMPLE INC',
+                    'return_url' => $this->urlGenerator->generate('paypal_return_url', [], UrlGeneratorInterface::ABSOLUTE_URL),
+                    'cancel_url' => $this->urlGenerator->generate('paypal_cancel_url', [], UrlGeneratorInterface::ABSOLUTE_URL),
+                    'brand_name' => 'Symfony App with Najmi Imad',
                     'locale' => 'en-US',
                     'landing_page' => 'BILLING',
                     'user_action' => 'PAY_NOW',

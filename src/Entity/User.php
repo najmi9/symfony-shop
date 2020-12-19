@@ -64,8 +64,15 @@ class User implements UserInterface
      */
     private $address;
 
-    public function isLikedByUser(int $id): bool
-    {   $isLiked = false;
+    /**
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private $cart = [];
+
+    public function isLikedByUser($id): bool
+    {   
+       
+        $isLiked = false;
         foreach ($this->likes as $like) {
             if ($like->getProduct()->getId() == $id) {
                  $isLiked = true;
@@ -269,6 +276,18 @@ class User implements UserInterface
     public function setAddress(?string $address): self
     {
         $this->address = $address;
+
+        return $this;
+    }
+
+    public function getCart(): ?array
+    {
+        return $this->cart;
+    }
+
+    public function setCart(?array $cart): self
+    {
+        $this->cart = $cart;
 
         return $this;
     }

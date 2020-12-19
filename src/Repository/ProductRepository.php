@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Product;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @method Product|null find($id, $lockMode = null, $lockVersion = null)
@@ -48,6 +49,20 @@ class ProductRepository extends ServiceEntityRepository
         return $qb->orderBy('p.id', 'ASC')
             ->getQuery()
             ->getResult()
+        ;
+    }
+
+    public function findProductsById(array $ids)
+    {
+        $qb = $this->createQueryBuilder('p');
+        return $qb->andWhere('p IN (:ids)')
+                ->setParameter('ids', 
+                    array_map(function ($id) {
+                        return Uuid::fromString($id)->toBinary();
+                    }
+                , $ids))
+                ->getQuery()
+                ->getResult()
         ;
     }
 }
