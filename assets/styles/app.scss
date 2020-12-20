@@ -1,0 +1,12 @@
+@import "custom";
+@import "~bootstrap/scss/bootstrap";
+
+body {
+  background-color: lightgray;
+}
+
+@media (min-width: 600px) {
+  .custom-form {
+    width: 600px;
+  }
+}

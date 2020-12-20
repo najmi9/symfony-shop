@@ -2,52 +2,55 @@
 
 {% block title %}Orders List!{% endblock %}
 
+{% block stylesheets %}{{ parent()}} {{ encore_entry_link_tags('home') }} {% endblock %}
+
 {% block body %}
-	<div class="container">
-		<div class="card card-custom">
-			<div class="card-header">
-				<div class="card-title">
-					<h2> Orders List </h2>
-				</div>
+<div class="container">
+	<div class="card card-custom">
+		<div class="card-header">
+			<div class="card-title">
+				<h2> Orders List </h2>
 			</div>
+		</div>
 
-			<div class="card-body">
-				<table class="table table-striped">
-  					<thead>
-                      <tr>
-                        <th scope="col">#ID</th>
-                        <th scope="col">Amount</th>
-                        <th scope="col">Create At</th>
-                        <th scope="col">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                  		{% for o in orders %}
-                  			<tr>
-                        		<th scope="row">{{ o.identifiant }}</th>
-                        		<td>{{ o.amount }}</td>
-                        		<td>{{ o.createdAt| date }}</td>
-                        		<td> 
-                        			{% if o.status == 'CREATED' %}
-                                <span class="badge badge-warning">Not Approved</span>
-                        			  
-                                   <a href="{{ o.approveLink }}" class="btn btn-sm" target="_blanck"> <small>Approve order</small></a>
-                                
-                        			{% else %}
-                        				<span class="badge badge-success">Approved</span>
-                        			{% endif %}
-                        		</td>
-                      		</tr>
-                  		{% endfor %}
-                    </tbody>
-                 </table>
-			</div>
+		<div class="card-body">
+			<table class="table">
+				<thead>
+					<tr>
+						<th scope="col">#ID</th>
+						<th scope="col">Amount</th>
+						<th scope="col">Created At</th>
+						<th scope="col">Status</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for o in orders %}
+					<tr>
+						<th scope="row">{{ o.identifiant }}</th>
+						<td>{{ o.amount }}</td>
+						<td>{{ o.createdAt| date }}</td>
+						<td>
+							{% if o.status == 'CREATED' %}
+							<span class="badge bg-warning text-dark">Not Approved</span>
 
-			<div class="card-footer">
-				<div class="navigation d-flex justify-content-center align-items-center my-3">
-            {{ knp_pagination_render(orders) }}
-        </div>
+							<a href="{{ o.approveLink }}" class="btn btn-sm link-success btn-link" target="_blanck">
+								<small>Approve order</small></a>
+
+							{% else %}
+							<span class="badge bg-success">Approved</span>
+							{% endif %}
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+
+		<div class="card-footer">
+			<div class="navigation d-flex justify-content-center align-items-center my-3">
+				{{ knp_pagination_render(orders) }}
 			</div>
 		</div>
 	</div>
+</div>
 {% endblock %}

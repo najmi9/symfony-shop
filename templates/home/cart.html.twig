@@ -1,0 +1,47 @@
+<div class="card shadow-lg p-2 mb-2 bg-white rounded">
+    <div class="card-header">
+        <div class="card-title">
+            <h5>{{ product.name }} </h5>
+        </div>
+        <div class="text-right text-info font-weight-bolder">
+            {{ product.price|format_number(style="currency") }} $
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="text-center">
+            <img src="{{ product.image }}" alt="{{ product.name }}">
+        </div>
+        <div class="d-flex justify-content-center align-items-center">
+            <a type="button" href="{{ path('product_show', {'id': product.id}) }}" class="btn btn-primary btn-sm m-2"
+                data-bs-toggle="tooltip" data-bs-placement="top" title="See Product Details" title="View Product title">
+                <i class="fas fa-eye"></i>
+            </a>
+
+            <button type="button" id="js-add-product" data-product="{{ product.id }}" class="btn btn-success btn-sm m-2"
+                data-bs-toggle="tooltip" data-bs-placement="top" title="Add to cart" title="View Product title">
+                <i class="fas fa-cart-plus"></i>
+            </button>
+
+            <button type="button" {% if not app.user %} data-user="no" {% endif %} id="js-like" class="btn btn-sm m-2"
+                title="Like" data-product="{{ product.id }}" data-bs-toggle="tooltip" data-bs-placement="top"
+                title="Like this product">
+                {% if app.user and app.user.isLikedByUser(product.id) %}
+                <i class="fas fa-heart text-danger fa-2x"></i>
+                {% else %}
+                <i class="far fa-heart text-danger fa-2x"></i>
+                {% endif %}
+            </button>
+
+            <span id="{{ 'js-likes-' ~ product.id }}"> {{ product.likes|length }} </span>
+
+        </div>
+        <div class="bg-light tet-italic">
+            {{ product.description }}
+        </div>
+        <div class="text-center bg-primary text-light">
+            <small class="text-italic">
+                #{{ product.category.title }}
+            </small>
+        </div>
+    </div>
+</div>

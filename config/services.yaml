@@ -6,6 +6,7 @@
 parameters:
     paypal_id: '%env(resolve:PAYPAL_ID)%'
     paypal_secret: '%env(resolve:PAYPAL_SECRET)%'
+    google_id: '%env(resolve:GOOGLE_ID)%'
 
 services:
     # default configuration for services in *this* file
@@ -41,3 +42,17 @@ services:
             - name: 'kernel.event_listener'
               event: 'Symfony\Component\Security\Http\Event\LogoutEvent'
               dispatcher: security.event_dispatcher.main
+    App\Service\GoogleService:
+        arguments:
+            $google_id: '%google_id%'
+            $google_secret: '%env(GOOGLE_SECRET)%'
+
+    App\EventListener\UserListener:
+        tags:
+            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\User'}
+            - { name: 'doctrine.orm.entity_listener', event: 'preUpdate', entity: 'App\Entity\User'}
+            - { name: 'doctrine.orm.entity_listener', event: 'postPersist', entity: 'App\Entity\User'}
+
+    App\Service\MailService:
+        arguments:
+            $sender_email: '%env(resolve:SENDER_EMAIL)%'

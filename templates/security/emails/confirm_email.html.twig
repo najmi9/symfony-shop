@@ -1,0 +1,11 @@
+<div>
+    <h4>Symfony App with Najmi</h4>
+    <h1>Hi {{ username }}</h1>
+    <div>
+        <p>
+            Thanks for creating an account in Our Website.
+            To confirm you account click the link bellow:
+            <a href="{{ absolute_url(path('email_confirmation', {"token": token})) }}">Confirm my email</a>
+        </p>
+    </div>
+</div>

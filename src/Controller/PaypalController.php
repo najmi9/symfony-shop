@@ -35,8 +35,8 @@ class PaypalController extends AbstractController
     public function pay(string $total, SessionInterface $session): Response
     {
 
-        if ($total<=0) {
-            $this->addFlash("warning", "Total should not be negative or null.");
+        if ($total <= 0 || $total > 10000) {
+            $this->addFlash("warning", "Total should not be negative or null or greate than 10000 .");
             return $this->redirectToRoute('cart');
         }
         $shippingPrice = ProjectConstants::SHIPPING_PRICE;
@@ -44,14 +44,119 @@ class PaypalController extends AbstractController
         $handlingPrice = ProjectConstants::HANDLINH_PRICE;
         $total = $total + $shippingPrice + $handlingPrice;
 
-        // update the value of the number of product in the cart icon (in the navbar)
-        $items = 0;
-        foreach ($session->get('cart', []) as $key => $value) {
-            $items += $value;
+        return $this->render('paypal/pay.html.twig', compact('total'));
+    }
+
+    /**
+     * capture the money
+     *
+     * @Route("/capture-payment", name="capture_payment", methods={"POST"})
+     */
+    public function captureOrder(Request $request, EntityManagerInterface $em, OrderRepository $orderRepo): JsonResponse
+    {
+        $env = new SandboxEnvironment($this->getParameter('paypal_id'), $this->getParameter('paypal_secret'));
+
+        $client = new PayPalHttpClient($env);
+
+        $result = json_decode($request->getContent(), true);
+
+        // Here, OrdersCaptureRequest() creates a POST request to /v2/checkout/orders
+        // $response->result->id gives the orderId of the order created above
+        /** @var Order $order */
+        $order = $orderRepo->findOneByIdentifiant($result['orderID']);
+        $request = new OrdersCaptureRequest($result['orderID']);
+        $request->prefer('return=representation');
+
+        // Call API with your client and get a response for your call
+        /** @var mixed */
+        $response = $client->execute($request);
+
+        // If call returns body in response, you can get the deserialized version from the result attribute of the response
+        $order = $this->updateOrder($order, $result);
+
+        $em->persist($order);
+        $em->flush();
+
+        return $this->json([
+            'message' => 'order completed successfly!',
+            'id' => $order->getId(),
+            'amount' => $order->getAmount()
+        ]);
+    }
+
+    /**
+     * @Route("/create-order", name="create_order", methods={"POST"})
+     */
+    public function createOrder(SessionInterface $session, CreateOrderService $createOrder, EntityManagerInterface $em, ProductRepository $productRepo): JsonResponse
+    {
+        $env = new SandboxEnvironment($this->getParameter('paypal_id'), $this->getParameter('paypal_secret'));
+
+        $client = new PayPalHttpClient($env);
+
+        $cart = $session->get('cart', []);
+
+        $products = $productRepo->findProductsById(array_keys($cart));
+
+        $subtotal = 0;
+
+        $items = [];
+        foreach ($products as $product) {
+            $subtotal += round($product->getPrice()) * $cart[$product->getId()->__toString()];
+            $items[] = [
+                'name' => $product->getName(),
+                'description' => $product->getCategory()->getTitle(),
+                'quantity' => (string) $cart[$product->getId()->__toString()],
+                'unit_amount' => [
+                    'currency_code' => 'USD',
+                    'value' =>  (string) round($product->getPrice()),
+                ],
+                'category' => 'PHYSICAL_GOODS',
+            ];
         }
 
+        $address = 'SET_PROVIDED_ADDRESS'; //$this->getUser()->getAddress() ?? 'address of paypal';
 
-        return $this->render('paypal/pay.html.twig', compact('total', 'items'));
+        $shippingPrice = ProjectConstants::SHIPPING_PRICE;
+        $currency = ProjectConstants::CURRENCY;
+        $handlingPrice = ProjectConstants::HANDLINH_PRICE;
+        $total = $subtotal + $shippingPrice + $handlingPrice;
+
+        $description = 'DESCRIPTION OF ORDER';
+
+        /** @var array $body */
+        $body = $createOrder->buildRequestBody(
+            $items,
+            (string) $subtotal,
+            (string) $total,
+            (string) $shippingPrice,
+            (string) $handlingPrice,
+            $currency,
+            $address,
+            $description
+        );
+
+        $errors = [];
+        try {
+            /** @var mixed */
+            $response = $createOrder->createOrder($client, $body);
+
+            /** @var Order $order */
+            $order = new Order();
+
+            $order->setAmount($response->result->purchase_units[0]->amount->value)
+                ->setApproveLink($response->result->links[1]->href)
+                ->setCreatedAt(new \DateTime($response->result->create_time))
+                ->setIdentifiant($response->result->id)
+                ->setStatus($response->result->status)
+                ->setPayee($response->result->purchase_units[0]->payee->email_address)
+                ->setUser($this->getUser());
+            $em->persist($order);
+            $em->flush();
+            return $this->json(['id' => $response->result->id]);
+        } catch (\Exception $e) {
+            $errors['message'] = json_decode($e->getMessage())->details[0]->description;
+            return  $this->json($errors, 400);
+        }
     }
 
     /**
@@ -97,115 +202,6 @@ class PaypalController extends AbstractController
         return $this->redirectToRoute('home');
     }
 
-    /**
-     * capture the money
-     *
-     * @Route("/capture-payment", name="capture_payment", methods={"POST"})
-     */
-    public function captureOrder(Request $request, EntityManagerInterface $em, OrderRepository $orderRepo): JsonResponse
-    {
-        $env = new SandboxEnvironment($this->getParameter('paypal_id'), $this->getParameter('paypal_secret'));
-
-        $client = new PayPalHttpClient($env);
-
-        $result = json_decode($request->getContent(), true);
-
-        /*https://localhost:8000/paypal/paypal-return?token=71Y009370T9939603&PayerID=KJB7KJ8TL5RAG*/
-
-        // Here, OrdersCaptureRequest() creates a POST request to /v2/checkout/orders
-        // $response->result->id gives the orderId of the order created above
-        /** @var Order $order */
-        $order = $orderRepo->findOneByIdentifiant($result['orderID']);
-        $request = new OrdersCaptureRequest($result['orderID']);
-        $request->prefer('return=representation');
-
-        // Call API with your client and get a response for your call
-        /** @var mixed */
-        $response = $client->execute($request);
-
-        // If call returns body in response, you can get the deserialized version from the result attribute of the response
-        $order = $this->updateOrder($order, $result);
-
-        $em->persist($order);
-        $em->flush();
-
-        return $this->json([
-            'message' => 'order completed successfly!',
-            'id' => $order->getId() ,
-            'amount' => $order->getAmount()
-        ]);
-    }
-
-    /**
-     * @Route("/create-order", name="create_order", methods={"POST"})
-     */
-    public function createOrder(SessionInterface $session, CreateOrderService $createOrder, EntityManagerInterface $em, ProductRepository $productRepo): JsonResponse
-    {
-        $env = new SandboxEnvironment($this->getParameter('paypal_id'), $this->getParameter('paypal_secret'));
-
-        $client = new PayPalHttpClient($env);
-
-        $cart = $session->get('cart', []);
-
-        $products = $productRepo->findProductsById(array_keys($cart));
-
-        $subtotal = 0;
-
-        $items = [];
-        foreach ($products as $product) {
-            $subtotal += round($product->getPrice()) * $cart[$product->getId()->__toString()];
-            $items[]= [
-                'name' => $product->getName(),
-                'description' => $product->getCategory()->getTitle(),
-                'quantity' => (string) $cart[$product->getId()->__toString()],
-                'unit_amount' => [
-                    'currency_code' => 'USD',
-                    'value' =>  (string) round($product->getPrice()),
-                ],
-                'category' => 'PHYSICAL_GOODS',
-            ];
-        }
-
-        $address = 'SET_PROVIDED_ADDRESS'; //$this->getUser()->getAddress() ?? 'address of paypal';
-
-        $shippingPrice = ProjectConstants::SHIPPING_PRICE;
-        $currency = ProjectConstants::CURRENCY;
-        $handlingPrice = ProjectConstants::HANDLINH_PRICE;
-        $total = $subtotal + $shippingPrice + $handlingPrice;
-       
-        $description = 'DESCRIPTION OF ORDER';
-
-        /** @var array $body */
-        $body = $createOrder->buildRequestBody(
-            $items,
-            (string) $subtotal,  
-            (string) $total,
-            (string) $shippingPrice,
-            (string) $handlingPrice,
-            $currency,
-            $address,
-            $description
-        );
-
-        /** @var mixed */
-        $response = $createOrder->createOrder($client, $body);
-
-        /** @var Order $order */
-        $order = new Order();
-
-        $order->setAmount($response->result->purchase_units[0]->amount->value)
-            ->setApproveLink($response->result->links[1]->href)
-            ->setCreatedAt(new \DateTime($response->result->create_time))
-            ->setIdentifiant($response->result->id)
-            ->setStatus($response->result->status)
-            ->setPayee($response->result->purchase_units[0]->payee->email_address)
-            ->setUser($this->getUser())
-        ;
-        $em->persist($order);
-        $em->flush();
-        return $this->json(['id' => $response->result->id]);
-    }
-
     private function updateOrder(Order $order, array $result): Order
     {
         $order->setUpdatedAt(new \DateTime())
@@ -213,8 +209,7 @@ class PaypalController extends AbstractController
             ->setFacilitatorAccessToken($result['facilitatorAccessToken'] ?? '')
             ->setPayeerId($result['payerID'])
             ->setPaymentId($result['paymentID'])
-            ->setBillingToken($result['billingToken'] ?? '')
-        ;
+            ->setBillingToken($result['billingToken'] ?? '');
         return $order;
     }
 }

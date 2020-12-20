@@ -28,12 +28,13 @@ class RegistrationController extends AbstractController
                     $user,
                     $form->get('plainPassword')->getData()
                 )
-            );
+            )->setEnabled(false);
 
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($user);
             $entityManager->flush();
-            // do anything else you need here, like send an email
+            
+            $this->addFlash('info', 'An email sent to you to confirm your account.');
 
             return $this->redirectToRoute('app_login');
         }

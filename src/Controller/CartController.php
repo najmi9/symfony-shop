@@ -82,18 +82,11 @@ class CartController extends AbstractController
         foreach ($products as $product) {
             $total += $product->getPrice() * $cart[$product->getId()->__toString()];
         }
-
-        // update the value of the number of product in the cart icon (in the navbar)
-        $items = 0;
-        foreach ($cart as $key => $value) {
-            $items += $value;
-        }
         
         return $this->render('cart/cart.html.twig', [
             'products' => $products,
             'cart' => $cart,
             'total' => $total,
-            'items' => $items,
         ]);
     }
 }

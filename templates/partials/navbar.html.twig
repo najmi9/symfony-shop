@@ -1,0 +1,46 @@
+<nav class="navbar navbar-expand navbar-light bg-light fixed-top">
+  <a class="navbar-brand d-none d-md-block" href="{{ path('home') }}">Symfony App</a>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="{{ path('home') }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Home">Home
+          <span class="sr-only">(current)</span></a>
+      </li>
+
+      <li class="nav-item active">
+        <a class="nav-link" data-bs-toggle="tooltip" data-bs-placement="top" title="Orders"
+          href="{{ path('orders') }}">Orders</a>
+      </li>
+
+    </ul>
+    <ul class="navbar-nav mt-auto">
+      <li class="nav-item">
+        <a href="{{ path('cart') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="top" title="Cart">
+          <i class="fas fa-cart-plus text-danger fa-1x"></i>
+          <span id="cart-products" class="text-success font-weight-bolder">
+            {{ (app.session.get('cart', [])|reduce((c, v) => c+v))|default(0) }}
+          </span>
+        </a>
+      </li>
+
+      {% if app.user %}
+      <span class="navbar-text text-primary">
+        {{ app.user.name }}
+      </span>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ path('app_logout') }}" data-bs-toggle="tooltip" data-bs-placement="top"
+          title="Logout">logout</a>
+
+        {% else %}
+        <a class="nav-link " href="{{ path('app_login') }}" tabindex="-1" data-bs-toggle="tooltip"
+          data-bs-placement="top" title="Login">Login</a>
+      </li>
+      <li>
+        <a class="nav-link" href="{{ path('app_register') }}" tabindex="-1" data-bs-toggle="tooltip"
+          data-bs-placement="top" title="Register">Register</a>
+      </li>
+      {% endif %}
+    </ul>
+  </div>
+</nav>

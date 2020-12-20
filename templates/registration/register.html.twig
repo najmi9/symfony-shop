@@ -3,23 +3,34 @@
 {% block title %}Register{% endblock %}
 
 {% block body %}
-    {% for flashError in app.flashes('verify_email_error') %}
-        <div class="alert alert-danger" role="alert">{{ flashError }}</div>
-    {% endfor %}
 
-   <div class="conntainer p-3 m-3 bg-light">
-    <h1 class="text-primary border-bottom">Register</h1>
-    {{ form_start(registrationForm) }}
-    {{ form_row(registrationForm.name, {"attr": {"class" : "form-control"}}) }}
-    {{ form_row(registrationForm.email, {"attr": {"class" : "form-control"}}) }}
-    {{ form_row(registrationForm.address, {"attr": {"class" : "form-control"}}) }}
-    {{ form_row(registrationForm.plainPassword, {
+<div class="d-flex justify-content-center align-items-center">
+    <div class="bg-light shadow-lg p-4 w-lg-50 rounded m-2 custom-form">
+        {% for flashError in app.flashes('verify_email_error') %}
+        <div class="alert alert-danger" role="alert">{{ flashError }}</div>
+        {% endfor %}
+
+        <h1 class="text-primary border-bottom">Register</h1>
+        {{ form_start(registrationForm) }}
+        {{ form_row(registrationForm.name, {"attr": {"class" : "form-control"}}) }}
+        {{ form_row(registrationForm.email, {"attr": {"class" : "form-control"}}) }}
+        {{ form_row(registrationForm.address, {"attr": {"class" : "form-control"}}) }}
+        {{ form_row(registrationForm.plainPassword, {
         "attr": {"class" : "form-control"},
         label: 'Password'
     }) }}
-    {{ form_row(registrationForm.agreeTerms) }}
+        <div class="form-group my-3">
+            {{ form_row(registrationForm.agreeTerms) }}
+        </div>
 
-    <button type="submit" class="btn btn-success">Register</button>
-{{ form_end(registrationForm) }}
-   </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-success btn-md">
+                <i class="fas fa-user-plus text-secondary"></i>
+                Register</button>
+        </div>
+
+        {{ form_end(registrationForm) }}
+    </div>
+</div>
+
 {% endblock %}

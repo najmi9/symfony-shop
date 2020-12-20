@@ -36,32 +36,36 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->_em->flush();
     }
 
-    // /**
-    //  * @return User[] Returns an array of User objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    /**
+     * find or create a user from google.
+     *
+     * @param mixed[] $credentials
+     */
+    public function findOrCreateUserFromGoogle(array $credentials): User
     {
-        return $this->createQueryBuilder('u')
-            ->andWhere('u.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('u.id', 'ASC')
-            ->setMaxResults(10)
+        $user = $this->createQueryBuilder('u')
+            ->where('u.email = :email')
+            ->setParameter('email', $credentials['email'])
             ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
+            ->getOneOrNullResult();
 
-    /*
-    public function findOneBySomeField($value): ?User
-    {
-        return $this->createQueryBuilder('u')
-            ->andWhere('u.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        if ($user) {
+            if (!$user->getGoogleId()) {
+                $user->setGoogleId($credentials['sub']);
+                $this->getEntityManager()->persist($user);
+                $this->getEntityManager()->flush();
+            }
+
+            return $user;
+        }
+        $user = (new User())
+            ->setName($credentials['name'])
+            ->setEmail($credentials['email'])
+            ->setGoogleId($credentials['sub'])
+            ->setEnabled(true);
+        $this->getEntityManager()->persist($user);
+        $this->getEntityManager()->flush();
+
+        return $user;
     }
-    */
 }

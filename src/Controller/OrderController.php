@@ -24,13 +24,7 @@ class OrderController extends AbstractController
             $request->query->getInt('page', 1), /*page number*/
             5
         );
-        
-        // update the value of the number of product in the cart icon (in the navbar)
-        $items = 0;
-        foreach ($session->get('cart', []) as $key => $value) {
-            $items += $value;
-        }
 
-        return $this->render('order/index.html.twig', compact('orders', 'items'));
+        return $this->render('order/index.html.twig', compact('orders'));
     }
 }

@@ -1,0 +1,18 @@
+
+{% if tomail %}
+<div>
+    <h1>Symfony App with Najmi</h1>
+    <h4>Hi {{ username }}: </h4>
+    click this link <a href="{{ absolute_url(path('email_confirmation', {'token': token})) }}">
+        to confirm your email!
+    </a>
+</div>
+{% else %}
+<div>
+    <h1>Symfony App</h1>
+    <h4>Hi {{ username }}: </h4>
+    click this link <a href="{{ absolute_url(path('reset_password', {'token': token})) }}">
+        reset my password
+    </a>
+</div>
+{% endif %}

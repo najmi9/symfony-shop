@@ -3,123 +3,31 @@
 {% block title %}Home{% endblock %}
 
 {% block body %}
-    <div class="row">
-        <div class="col-lg-3">
-            {% include 'home/_search.html.twig' %}
-        </div>
-        <div class="col-lg-9">
-    <div class="bg-light pt-3 row mb-3">
-        <div class="h4 text-primary col-6">
-            <i class="fas fa-bars"></i>
-            {{ products.getTotalItemCount }} Products
-        </div>
-        <div class="h2 col-6"> 
-            {{ knp_pagination_sortable(products, 'Price', 'price') }}
-        </div>
+<div class="row">
+    <div class="col-lg-3">
+        {% include 'home/_search.html.twig' %}
     </div>
-        <div class="row justify-content-center align-items-center">
+    <div class="col-lg-9">
+
+        <div class="mb-2  bg-white rounded shadow-lg p-2 d-flex justify-content-end">
+            <div class="text-right">{{ knp_pagination_sortable(products, 'Price', 'price') }} </div>
+        </div>
+
+        <div class="row justify-content-center align-self-cente align-items-center">
             {% for product in products %}
-                <div class="col-lg-6 col-md-6 mb-2">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">
-                                <h5>{{ product.name }} </h5>
-                            </div>
-                            <div class="text-right text-info font-weight-bolder">
-                                {{ product.price|format_number(style="currency") }} $
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="text-center">
-                               {# <img src="{{ product.image }}" alt="{{ product.name }}">#}
-                            </div>
-                            <div class="d-flex justify-content-center align-items-center">
-                                <a href="{{ path('product_show', {'id': product.id}) }}" class="btn btn-primary btn-sm m-2" title="View Product title">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-
-                                <button id="js-add-product" data-product="{{ product.id }}"
-                                 class="btn btn-success btn-sm m-2" title="View Product title">
-                                    <i class="fas fa-cart-plus"></i>
-                                </button>
-
-                                  <button {% if not app.user %} disabled="true" {% endif %} 
-                                   id="js-like" class="btn btn-sm m-2" 
-                                   title="Like" data-product="{{ product.id }}">
-                                    {% if app.user and app.user.isLikedByUser(product.id) %}
-                                         <i class="fas fa-heart text-danger fa-2x"></i>
-                                    {% else %}
-                                         <i class="far fa-heart text-danger fa-2x"></i>
-                                    {% endif %}
-                                  </button>
-
-                                  <span id="{{ 'js-likes-' ~ product.id }}"> {{ product.likes|length }} </span>
-
-                            </div>
-                            <div class="bg-light tet-italic">
-                                {{ product.description }}
-                            </div>
-                            <div class="text-center bg-primary text-light">
-                                 <small class="text-italic">
-                                #{{ product.category.title }}
-                           </small>
-                            </div>
-                       </div>
-                    </div>
-                </div>
+            <div class="col-lg-6 col-md-6 mb-2">
+                {% include 'home/cart.html.twig' %}
+            </div>
             {% endfor %}
         </div>
         <div class="navigation d-flex justify-content-center align-items-center my-3">
             {{ knp_pagination_render(products) }}
         </div>
     </div>
- </div>
+</div>
 {% endblock %}
 
 {% block javascripts %}
-    <script>
-        document.querySelectorAll('#js-add-product').forEach(btn => {
-            btn.onclick = (e) => {
-                const id = btn.dataset.product;
-                const url = "/cart/add-product";
-                fetch(url, {
-                    method: 'POST',
-                    body: JSON.stringify(id)
-                })
-                .then(res => res.json())
-                .then(res=> {
-                    document.querySelector('#cart-products').innerHTML=res.products;
-                    document.querySelector('#toast').innerHTML = `
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <strong>Product added to the cart</strong> 
-                    </div>
-                    `;
-                })
-                .catch(err=>console.error(err));
-            }
-        });
-
-        document.querySelectorAll('#js-like').forEach(btn => {
-            btn.onclick = e => {
-                const id = btn.dataset.product;
-                const url = "/like";
-                fetch(url, {
-                    method: 'POST',
-                    body: JSON.stringify(id)
-                })
-                .then(res => res.json())
-                .then(res=> {
-                   document.querySelector('span#js-likes-'+id).innerHTML = res.likes;
-                   const icon = btn.querySelector("i");
-                    if (icon.classList.contains('fas')) {
-                        icon.classList.replace('fas', 'far')
-                    }else{
-                        icon.classList.replace('far', 'fas');
-                    }
-                })
-                .catch(err=>console.error(err));
-            }
-        });
-
-    </script>
+{{ parent() }}
+{{ encore_entry_script_tags('home') }}
 {% endblock %}

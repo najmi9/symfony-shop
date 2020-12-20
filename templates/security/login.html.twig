@@ -3,38 +3,56 @@
 {% block title %}Log in!{% endblock %}
 
 {% block body %}
-    <div class="container">
-<form method="post">
-    {% if error %}
-        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-    {% endif %}
 
-    {% if app.user %}
-        <div class="mb-3">
-            You are logged in as {{ app.user.username }}, <a href="{{ path('app_logout') }}">Logout</a>
-        </div>
-    {% endif %}
+<div class="container d-flex justify-content-center align-items-center">
+    <div class="bg-light shadow-lg p-4 w-lg-50 rounded m-2 custom-form">
 
-    <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-    <label for="inputEmail">Email</label>
-    <input type="email" value="user@gmail.com" name="email" id="inputEmail" class="form-control" required autofocus>
-    <label for="inputPassword">Password</label>
-    <input type="password" name="password" value="123456" id="inputPassword" class="form-control" required>
+        <form method="post">
+            {% if error %}
+            <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+            {% endif %}
 
-    <input type="hidden" name="_csrf_token"
-           value="{{ csrf_token('authenticate') }}"
-    >
+            {% if app.user %}
+            <div class="mb-3">
+                You are logged in as {{ app.user.username }}, <a href="{{ path('app_logout') }}">Logout</a>
+            </div>
+            {% endif %}
 
-        <div class="checkbox mb-3">
-            <label>
-                <input type="checkbox" name="_remember_me"> Remember me
-            </label>
-        </div>
-    
+            <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
 
-    <button class="btn btn-lg btn-primary" type="submit">
-        Sign in
-    </button>
-</form>
+            <div class="form-group">
+                <label for="inputEmail">Email</label>
+                <input type="email" value="user@gmail.com" name="email" id="inputEmail" class="form-control" required
+                    autofocus>
+                <a href="{{ path('send_mail', {'tomail': 'confirm'}) }}" class="link-secondary"><small>Your email not
+                        confirmed yet?</small></a>
+            </div>
+
+
+            <div class="form-group">
+                <label for="inputPassword">Password</label>
+                <input type="password" name="password" value="123456" id="inputPassword" class="form-control" required>
+                <a href="{{ path('send_mail') }}" class="link-success"><small>Do you forget your password?</small></a>
+            </div>
+
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+            <div class="checkbox mb-3">
+                <label>
+                    <input type="checkbox" name="_remember_me"> Remember me
+                </label>
+            </div>
+
+
+            <div class="form-group">
+                <button class="btn btn-lg btn-primary" type="submit">
+                    <i class="fas fa-sign-in-alt text-secondary"></i> Sign in
+                </button>
+                <a href="{{ path('google') }}" class="btn btn-lg btn-success"> <i
+                        class="fab fa-google text-warning"></i> Login with Google </a>
+            </div>
+
+        </form>
+    </div>
 </div>
 {% endblock %}

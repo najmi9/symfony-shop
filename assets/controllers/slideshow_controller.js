@@ -10,7 +10,25 @@ import { Controller } from 'stimulus';
  * Delete this file or adapt it for your use!
  */
 export default class extends Controller {
-    connect() {
-        this.element.textContent = 'Hello Stimulus! Edit me in assets/controllers/hello_controller.js';
-    }
+  static targets = [ "slide" ]
+  static values = { index: Number }
+
+   indexValueChanged() {
+    this.showCurrentSlide()
+  }
+
+  next() {
+     this.indexValue++
+  }
+
+  previous() {
+     this.indexValue--
+  }
+
+  showCurrentSlide() {
+    this.slideTargets.forEach((element, index) => {
+      element.hidden = index != this.indexValue
+    })
+  }
 }
+

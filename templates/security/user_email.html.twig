@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+{% if tomail %}
+Email Confirmation
+{% else %}
+Forgot Password
+{% endif %}
+{% endblock %}
+
+{% block body %}
+
+<div class="container d-flex justify-content-center align-items-center">
+
+    <div class="bg-light shadow-lg p-4 w-lg-50 rounded m-2 custom-form">
+        <!--begin::Form-->
+        {{ form_start(form)}}
+        <div class="pb-13 pt-lg-0 pt-5">
+            <h3 class="font-weight-bolder text-dark font-size-h4 font-size-h1-lg">
+                {% if tomail %}
+                Email Confirmation
+                {% else %}
+                Forgot Password
+                {% endif %}
+            </h3>
+            <p class="text-muted font-weight-bold font-size-h4">
+                {% if tomail %}
+                Email to confirm
+                {% else %}
+                Email To reset password
+                {% endif %}
+            </p>
+        </div>
+        <!--end::Title-->
+        <!--begin::Form group-->
+        <div class="form-group my-2">
+            {{ form_row(form.email, {'attr':{'class':'form-control rounded-lg font-size-h6', 'placeholder':'Email'}, 'label': false})
+        }}
+        </div>
+        <!--end::Form group-->
+        <!--begin::Form group-->
+        <div class="form-group my-2">
+            <button type="submit" class="btn btn-primary font-weight-bolder font-size-h6 px-8">
+                Submit
+            </button>
+        </div>
+        <!--end::Form group-->
+        {{ form_end(form) }}
+        <!--end::Form-->
+    </div>
+
+</div>
+<!--end::Forgot-->
+{% endblock %}
