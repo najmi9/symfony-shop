@@ -19,10 +19,10 @@
     <div class="mx-2" style="position: relative; margin-top: 80px;">
         <div id="toasts"></div>
         {% for label, messages in app.flashes %}
-        <div>
+        <div class="container">
             <div class="alert alert-{{ label }}">
                 {% for message in messages %}
-                <p>{{ message | raw }}</p>
+                <p class="alert-heading">{{ message | raw }}</p>
                 {% endfor %}
             </div>
         </div>
