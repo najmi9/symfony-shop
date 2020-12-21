@@ -2,15 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\ProductRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\IdGenerator\UuidV4Generator;
 use Symfony\Component\Uid\UuidV4;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
- * @ORM\Entity(repositoryClass=ProductRepository::class)
+ * @ORM\Entity(repositoryClass=App\Repository\ProductRepository::class)
  */
 class Product
 {
@@ -18,7 +16,7 @@ class Product
      * @ORM\Id
      * @ORM\Column(type="uuid", unique=true)
      * @ORM\GeneratedValue(strategy="CUSTOM")
-     * @ORM\CustomIdGenerator(class=UuidV4Generator::class)
+     * @ORM\CustomIdGenerator(class=\Symfony\Bridge\Doctrine\IdGenerator\UuidV4Generator::class)
      */
     private $id;
 
@@ -58,7 +56,7 @@ class Product
         $this->likes = new ArrayCollection();
     }
 
-    public function getId(): UuidV4
+    public function getId(): ?UuidV4
     {
         return $this->id;
     }

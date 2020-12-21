@@ -1,0 +1,44 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Reports {% endblock %}
+
+ {% block stylesheets %}
+   {{ parent() }}    {{ encore_entry_link_tags('admin') }}
+ {% endblock %}
+
+{% block body %}
+   <div class="rounded px-2">
+       <h2 class="text-success">Reports</h2>
+   </div>
+
+   <div class="conatainer mx-5">
+   <div class=" row d-flex justify-content-center align-items-center">
+
+    	<div class="col-lg-6">
+    	<div class="h4 text-primary"> New Users per months : </div>
+    	 <div id="chart-users" style="width: 500px; height: 300px;"></div>
+    	 </div>
+    	 <div class="col-lg-6">
+    	 <div class="h4 text-primary"> Percentage of products in categories : </div>
+    	 	<div id="chart-categories" style=" width: 500px; height: 300px;"></div>
+    	 </div>
+     
+     <div class="col-lg-6">
+     <div class="h4 text-primary"> the Sum of orders price per month : </div>
+     	<div id="chart-orders" style="width: 500px; height: 300px;"></div>
+     </div>
+    </div>
+    </div>
+
+
+
+   <div id="data-admin" data-users="{{ users|json_encode }}"
+   data-months="{{ months|json_encode }}" data-order-prices="{{ orderPrices|json_encode }}"
+   data-order-months="{{ orderMonths|json_encode }}" data-categories="{{ categories|json_encode }}">
+   </div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }} {{ encore_entry_script_tags('admin') }}
+{% endblock javascripts %}

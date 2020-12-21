@@ -10,7 +10,11 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\LikeRepository;
 use App\Repository\ProductRepository;
 use App\Entity\Like;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
+/**
+ * @IsGranted("ROLE_USER")
+ */
 class LikeController extends AbstractController
 {
     /**

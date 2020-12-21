@@ -68,4 +68,20 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
         return $user;
     }
+
+    /**
+     * @return mixed[]
+     */
+    public function getNewUsersByMonth(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->select('count(u.id) as count, YEAR(u.createdAt) AS year, MONTH(u.createdAt) AS month')
+            ->groupBy('year')
+            ->addGroupBy('month')
+            ->orderBy('year', 'ASC')
+            ->addOrderBy('month', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 }

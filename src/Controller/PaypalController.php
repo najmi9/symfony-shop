@@ -149,7 +149,11 @@ class PaypalController extends AbstractController
                 ->setIdentifiant($response->result->id)
                 ->setStatus($response->result->status)
                 ->setPayee($response->result->purchase_units[0]->payee->email_address)
-                ->setUser($this->getUser());
+                ->setUser($this->getUser())
+            ;
+            $session->clear('cart');
+            $user = ($this->getUser())->setCart([]);
+            $em->persist($user);
             $em->persist($order);
             $em->flush();
             return $this->json(['id' => $response->result->id]);

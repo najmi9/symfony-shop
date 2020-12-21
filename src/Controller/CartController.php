@@ -66,9 +66,11 @@ class CartController extends AbstractController
         if ($id) {
             $user = $this->getUser();
             unset($cart[$id]);
-            $user->setCart($cart);
-            $em->persist($user);
-            $em->flush();
+            if ($user) {
+                $user->setCart($cart);
+                $em->persist($user);
+                $em->flush();
+            }
         }
 
         // update the cart session by the newest one

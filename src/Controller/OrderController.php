@@ -9,7 +9,11 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\OrderRepository;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
+/**
+ * @IsGranted("ROLE_USER")
+ */
 class OrderController extends AbstractController
 {
     /**

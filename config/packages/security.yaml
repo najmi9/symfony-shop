@@ -39,5 +39,7 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/reports, roles: ROLE_ADMIN }
+        - { path: ^/like, roles: ROLE_USER }
         - { path: ^/order, roles: ROLE_USER }
         - { path: ^/paypal, roles: ROLE_USER }
