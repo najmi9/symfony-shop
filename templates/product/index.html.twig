@@ -5,7 +5,7 @@
 {% block body %}
 	<div class="container">
 		<div class="d-flex justify-content-center align-items-center">
-				<div class="card">
+				<div class="card custom-form">
 		<div class="card-header">
 			<h1 class="bg-light">
 				<span class="text-left">{{ product.name }}</span>
@@ -14,10 +14,16 @@
 		</div>
 		<div class="card-body">
 			<div class="card-media text-center">
-				<img src="{{ product.image }}" alt="product.name" width="500" height="300">	
+				<img src="{{ product.image }}" alt="product.name">	
 			</div>
 			<div class="card-content rounded bg-light shadow-lg">
-			{{ product.description }}
+			 Description: <b>{{ product.description }}</b>
+		  </div>
+		  <div class="text-bold text-sucess">
+		  	Category:  <b>{{ product.category.title }}</b>
+		  </div>
+		  <div>
+		  	Categroy Description: <b>{{ product.category.description }}</b>
 		  </div>
 		</div>
 		

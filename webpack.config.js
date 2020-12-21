@@ -24,6 +24,9 @@ Encore
     .addEntry('paypal', './assets/pages/paypal.js')
     .addEntry('home', './assets/pages/home.js')
     .addEntry('reports', './assets/pages/reports.js')
+    .addEntry('error500', './assets/errors/error500.js')
+    .addEntry('error404', './assets/errors/error404.js')
+    .addEntry('error403', './assets/errors/error403.js')
 
     // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
 
