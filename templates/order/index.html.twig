@@ -5,7 +5,6 @@
 {% block stylesheets %}{{ parent()}} {{ encore_entry_link_tags('home') }} {% endblock %}
 
 {% block body %}
-<div class="container">
 	<div class="card card-custom">
 		<div class="card-header">
 			<div class="card-title">
@@ -17,7 +16,7 @@
 			<table class="table">
 				<thead>
 					<tr>
-						<th scope="col">#ID</th>
+						<th class="d-none d-md-block" scope="col">#ID</th>
 						<th scope="col">Amount</th>
 						<th scope="col">Created At</th>
 						<th scope="col">Status</th>
@@ -26,9 +25,9 @@
 				<tbody>
 					{% for o in orders %}
 					<tr>
-						<th scope="row">{{ o.identifiant }}</th>
+						<th class="d-none d-md-block" scope="row">{{ o.identifiant }}</th>
 						<td>{{ o.amount }}</td>
-						<td>{{ o.createdAt| date }}</td>
+						<td>{{ o.createdAt| date('Y-m-d') }}</td>
 						<td>
 							{% if o.status == 'CREATED' %}
 							<span class="badge bg-warning text-dark">Not Approved</span>
@@ -52,5 +51,4 @@
 			</div>
 		</div>
 	</div>
-</div>
 {% endblock %}

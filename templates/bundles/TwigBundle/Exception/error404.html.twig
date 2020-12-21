@@ -1,23 +1,30 @@
-{% extends 'base.html.twig' %}
+<!DOCTYPE html>
+<html>
 
-{% block title %}Error 404{% endblock %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+        integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
+    {{ encore_entry_link_tags('error404') }}
+    <title>Symfoy| Error 404</title>
+</head>
 
+<body>
 
-{% block stylesheets %}
- {{ encore_entry_link_tags('error404') }}
-  {% endblock %}
+    <div class="mainbox">
+        <div class="err">4</div>
+        <i class="far fa-question-circle fa-spin"></i>
+        <div class="err2">4</div>
+        <div class="msg">Maybe this page moved? Got deleted? Is hiding out in quarantine? Never existed in the first
+            place?
+            <p>Let's go <a href="{{ path('home') }}">home</a> and try from there.</p>
+        </div>
+    </div>
+    {{ encore_entry_script_tags('error404') }}
 
-{% block body %}
+</body>
 
-
-  <div class="mainbox">
-    <div class="err">4</div>
-    <i class="far fa-question-circle fa-spin"></i>
-    <div class="err2">4</div>
-    <div class="msg">Maybe this page moved? Got deleted? Is hiding out in quarantine? Never existed in the first place?<p>Let's go <a href="{{ path('home') }}">home</a> and try from there.</p></div>
-      </div>
-{% endblock %}
-
-{% block javascripts %}
- {{ encore_entry_script_tags('error404') }}
-  {% endblock %}
+</html>
