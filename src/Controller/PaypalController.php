@@ -4,17 +4,16 @@ namespace App\Controller;
 
 use App\Entity\Order;
 use App\Repository\OrderRepository;
-use PayPalHttp\HttpException;
 use App\Service\Paypal\CreateOrderService;
 use Doctrine\ORM\EntityManagerInterface;
 use PayPalCheckoutSdk\Core\PayPalHttpClient;
 use Symfony\Component\HttpFoundation\Request;
 use PayPalCheckoutSdk\Core\SandboxEnvironment;
+use PayPalCheckoutSdk\Core\ProductionEnvironment;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use PayPalCheckoutSdk\Orders\OrdersCaptureRequest;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -37,8 +36,10 @@ class PaypalController extends AbstractController
 
         if ($total <= 0 || $total > 10000) {
             $this->addFlash("warning", "Total should not be negative or null or greate than 10000 .");
+
             return $this->redirectToRoute('cart');
         }
+
         $shippingPrice = ProjectConstants::SHIPPING_PRICE;
 
         $handlingPrice = ProjectConstants::HANDLINH_PRICE;
@@ -54,9 +55,7 @@ class PaypalController extends AbstractController
      */
     public function captureOrder(Request $request, EntityManagerInterface $em, OrderRepository $orderRepo): JsonResponse
     {
-        $env = new SandboxEnvironment($this->getParameter('paypal_id'), $this->getParameter('paypal_secret'));
-
-        $client = new PayPalHttpClient($env);
+        $client = $this->getClient();
 
         $result = json_decode($request->getContent(), true);
 
@@ -68,8 +67,7 @@ class PaypalController extends AbstractController
         $request->prefer('return=representation');
 
         // Call API with your client and get a response for your call
-        /** @var mixed */
-        $response = $client->execute($request);
+        $client->execute($request);
 
         // If call returns body in response, you can get the deserialized version from the result attribute of the response
         $order = $this->updateOrder($order, $result);
@@ -89,9 +87,7 @@ class PaypalController extends AbstractController
      */
     public function createOrder(SessionInterface $session, CreateOrderService $createOrder, EntityManagerInterface $em, ProductRepository $productRepo): JsonResponse
     {
-        $env = new SandboxEnvironment($this->getParameter('paypal_id'), $this->getParameter('paypal_secret'));
-
-        $client = new PayPalHttpClient($env);
+        $client = $this->getClient();
 
         $cart = $session->get('cart', []);
 
@@ -152,14 +148,14 @@ class PaypalController extends AbstractController
                 ->setUser($this->getUser())
             ;
             $session->clear('cart');
-            $user = ($this->getUser())->setCart([]);
+            $user = $this->getUser();
+            $user->setCart([]);
             $em->persist($user);
             $em->persist($order);
             $em->flush();
             return $this->json(['id' => $response->result->id]);
         } catch (\Exception $e) {
-            $errors['message'] = json_decode($e->getMessage())->details[0]->description;
-            return  $this->json($errors, 400);
+            return  $this->json(['message' => 'Error'], 400);
         }
     }
 
@@ -215,5 +211,16 @@ class PaypalController extends AbstractController
             ->setPaymentId($result['paymentID'])
             ->setBillingToken($result['billingToken'] ?? '');
         return $order;
+    }
+
+    private function getClient(): PayPalHttpClient
+    {
+        if ($this->getParameter('env') == 'dev' || $this->getParameter('env') == 'test') {
+            $env = new SandboxEnvironment($this->getParameter('paypal_id'), $this->getParameter('paypal_secret'));
+        }else {
+             $env = new ProductionEnvironment($this->getParameter('paypal_id'), $this->getParameter('paypal_secret'));
+        }
+
+        return $client = new PayPalHttpClient($env);
     }
 }

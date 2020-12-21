@@ -26,7 +26,7 @@ window.createOrder = () => fetch('/paypal/create-order', options())
     .catch(err => {
         console.log(err)
         const toast = new ToastComponent(
-            err.message,
+            'Sorry, Unexpected error happend.',
             'toast-danger',
             'bg-danger',
             'fa-times'
@@ -48,7 +48,7 @@ window.onApprove = (data, actions) => fetch("/paypal/capture-payment", options(J
     })
     .catch(err => {
         const toast = new ToastComponent(
-            err.message,
+            'Sorry, Unexpected error happend.',
             'toast-danger',
             'bg-danger',
             'fa-times'
@@ -68,7 +68,7 @@ window.onCancel = (data) => {
 
 window.onError = (err) => {
     const toast = new ToastComponent(
-        err.message,
+        'Sorry. ',
         'toast-danger',
         'bg-danger',
         'fa-times'
