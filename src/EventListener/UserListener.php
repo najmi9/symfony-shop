@@ -35,6 +35,7 @@ class UserListener
     {
         $token = $this->tokenGenerator->generateToken();
         $user->setCreatedAt(new \DateTime())
+            ->setUpdatedAt(new \DateTime())
             ->setConfirmationToken($token)
         ;
     }

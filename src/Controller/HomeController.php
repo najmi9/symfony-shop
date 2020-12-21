@@ -28,7 +28,7 @@ class HomeController extends AbstractController
         foreach ($session->get('cart', []) as $key => $value) {
             $items += $value;
         }
-        return $this->render('home/index.html.twig', [
+        return $this->render('home/home.html.twig', [
             'products' => $products,
             'items' => $items,
             'categories' => $categoryRepo->findAll()
