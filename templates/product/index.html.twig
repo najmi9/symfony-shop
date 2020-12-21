@@ -4,13 +4,23 @@
 
 {% block body %}
 	<div class="container">
-		<div class="card">
-		<div>
-			{{ product.name }} {{ product.price }}
+		<div class="d-flex justify-content-center align-items-center">
+				<div class="card">
+		<div class="card-header">
+			<h1 class="bg-light">
+				<span class="text-left">{{ product.name }}</span>
+				<span class="text-right text-primary">{{ product.price }} $</span>
+			</h1>
 		</div>
-		<img src="{{ product.image }}" alt="product.name">
-		<div>
+		<div class="card-body">
+			<div class="card-media text-center">
+				<img src="{{ product.image }}" alt="product.name" width="500" height="300">	
+			</div>
+			<div class="card-content rounded bg-light shadow-lg">
 			{{ product.description }}
+		  </div>
+		</div>
+		
 		</div>
 		</div>
 	</div>

@@ -215,11 +215,14 @@ class PaypalController extends AbstractController
 
     private function getClient(): PayPalHttpClient
     {
-        if ($this->getParameter('env') == 'dev' || $this->getParameter('env') == 'test') {
+        /*if ($this->getParameter('env') == 'dev' || $this->getParameter('env') == 'test') {
             $env = new SandboxEnvironment($this->getParameter('paypal_id'), $this->getParameter('paypal_secret'));
         }else {
              $env = new ProductionEnvironment($this->getParameter('paypal_id'), $this->getParameter('paypal_secret'));
         }
+        */
+
+        $env = new SandboxEnvironment($this->getParameter('paypal_id'), $this->getParameter('paypal_secret'));
 
         return $client = new PayPalHttpClient($env);
     }

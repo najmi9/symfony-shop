@@ -108,6 +108,9 @@
     "egulias/email-validator": {
         "version": "2.1.24"
     },
+    "fzaninotto/faker": {
+        "version": "v1.9.2"
+    },
     "laminas/laminas-code": {
         "version": "3.5.1"
     },
@@ -116,6 +119,9 @@
     },
     "laminas/laminas-zendframework-bridge": {
         "version": "1.1.1"
+    },
+    "mbezhanov/faker-provider-collection": {
+        "version": "1.2.1"
     },
     "monolog/monolog": {
         "version": "2.2.0"
