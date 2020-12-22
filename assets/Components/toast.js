@@ -12,7 +12,7 @@ export default class ToastComponent {
 
 	toastContent() {
 		return `
-		<div style="position: fixed; top: 50px; right: 5px; z-index: 10;" 
+		<div style="position: fixed; bottom: 0px; right: 5px; z-index: 10;" 
 		class="toast ${ this.type } ${ this.bg } text-white" role="alert" aria-live="assertive" aria-atomic="true">
   			<div class="toast-header">
     		<i class="fas ${ this.icon } text-secondary fa-2x"></i>
