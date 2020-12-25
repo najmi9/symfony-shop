@@ -66,9 +66,10 @@ class StripeController extends AbstractController
      *
      * @Route("/stripe/success", name="stripe_success", methods={"GET"})
      */
-    public function stripeSuccess(Request $request): Response
+    public function stripeSuccess(): Response
     {
-        dd($request);
+        $this->addFlash('success', 'Payment Successed.');
+        return $this->redirectToRoute('cart');
     }
 
     /**
@@ -78,6 +79,7 @@ class StripeController extends AbstractController
      */
     public function stripeCanacel(Request $request): Response
     {
-        dd($request);
+        $this->addFlash('warning', 'Payment Canceled.');
+        return $this->redirectToRoute('cart');
     }
 }
