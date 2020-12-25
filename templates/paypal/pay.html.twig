@@ -2,10 +2,12 @@
 
 {% block title %} Pay with Paypal{% endblock %}
 
-{% block body %}
+{% block stylesheets %}
+    {{ parent() }}
+    <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD"></script>
+{% endblock %}
 
-<script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD"> // Replace YOUR_SB_CLIENT_ID with your sandbox client ID
-</script>
+{% block body %}
 
 <div class="container d-flex justify-content-center align-items-center">
     <div class="bg-light shadow-lg p-4 w-lg-50 rounded m-2 custom-form">

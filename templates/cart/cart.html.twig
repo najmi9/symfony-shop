@@ -2,6 +2,11 @@
 
 {% block title %} Cart of Products{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <script src="https://js.stripe.com/v3/"></script>
+{% endblock %}
+
 {% block body %}
     <h1 class="bg-light font-weight-bolder text-primary border-bottom rounded p-3"> My Cart : </h1>
     <table class="table bg-light p-2 rounded">
@@ -45,12 +50,49 @@
                 <td class="text-center" colspan="6">
                     <a type="button" data-bs-toggle="tooltip" data-bs-placement="top" title="Pay With PayPal"
                         href="{{ path("paypal_send_payment", {'total': total}) }}" class="btn btn-lg btn-primary">
-                        <i class="fas fa-money-bill-wave" text-secondary></i>Payer
+                        <i class="fab fa-paypal text-warning" text-secondary></i>Payer With Paypel
                     </a>
+                    <button data-bs-toggle="tooltip" data-bs-placement="top" title="Pay With Stripe"
+                        class="btn btn-lg btn-success" id="checkout-button">
+                        <i class="fab fa-stripe text-danger" text-secondary></i>Payer With Stripe
+                    </button>
                     Total : <span class="badge bg-success"> {{ total|format_number }} $ </span>
 
                 </td>
             </tr>
         </footer>
     </table>
+{% endblock %}
+
+
+
+{% block javascripts %}
+    {{ parent() }}
+    <script type="text/javascript">
+    const stripe = Stripe("{{ public_key }}");
+
+    const checkoutButton = document.getElementById("checkout-button");
+
+    checkoutButton.addEventListener("click", () => {
+
+        fetch("{{ path('create_checkout_session') }}", {
+            method: "POST",
+        })
+        .then(res => res.json())
+        .then(session => stripe.redirectToCheckout({ sessionId: session.id }))
+        .then((result) => {
+            console.log(result)
+            // If redirectToCheckout fails due to a browser or network
+            // error, you should display the localized error message to your
+            // customer using error.message.
+            if (result.error) {
+                alert(result.error.message);
+            }
+        })
+        .catch(function (error) {
+            console.error("Error:", error);
+        });
+    });
+
+    </script>
 {% endblock %}
