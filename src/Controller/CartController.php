@@ -89,6 +89,7 @@ class CartController extends AbstractController
             'products' => $products,
             'cart' => $cart,
             'total' => $total,
+            'public_key' => $this->getParameter('stripe_public_key'),
         ]);
     }
 }
