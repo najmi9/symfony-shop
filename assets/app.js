@@ -1,4 +1,4 @@
-import './styles/app.scss';
+import './css/styles/app.scss';
 
 import { Tooltip } from 'bootstrap';
 

@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} {{ product.name }} {% endblock %}
+
+{% block body %}
+	<div class="container">
+		<div class="d-flex justify-content-center align-items-center">
+				<div class="card custom-form">
+		<div class="card-header">
+			<h1 class="bg-light">
+				<span class="text-left">{{ product.name }}</span>
+				<span class="text-right text-primary">{{ product.price }} $</span>
+			</h1>
+		</div>
+		<div class="card-body">
+			<div class="card-media text-center">
+				<img src="{{ product.image }}" alt="product.name">	
+			</div>
+			<div class="card-content rounded bg-light shadow-lg">
+			 Description: <b>{{ product.description }}</b>
+		  </div>
+		  <div class="text-bold text-sucess">
+		  	Category:  <b>{{ product.category.title }}</b>
+		  </div>
+		  <div>
+		  	Categroy Description: <b>{{ product.category.description }}</b>
+		  </div>
+		</div>
+		
+		</div>
+		</div>
+	</div>
+{% endblock %}

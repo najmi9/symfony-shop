@@ -1,4 +1,4 @@
-import '../styles/reports.css'
+import '../../css/styles/reports.css'
 import ApexCharts from 'apexcharts'
 
 const div = document.querySelector('div#data-admin');

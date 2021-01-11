@@ -1,0 +1,9 @@
+@import "~dropzone/dist/dropzone.css";
+.dz-preview{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.dz-error-mark svg, .dz-success-mark, .dz-filename{
+	display: none;
+}

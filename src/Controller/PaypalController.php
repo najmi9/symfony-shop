@@ -18,6 +18,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Repository\ProductRepository;
+use App\Service\CartService;
 use App\Service\ProjectConstants;
 
 /**
@@ -85,39 +86,12 @@ class PaypalController extends AbstractController
     /**
      * @Route("/create-order", name="create_order", methods={"POST"})
      */
-    public function createOrder(SessionInterface $session, CreateOrderService $createOrder, EntityManagerInterface $em, ProductRepository $productRepo): JsonResponse
+    public function createOrder(SessionInterface $session, CreateOrderService $createOrder, 
+    EntityManagerInterface $em, CartService $cartService): JsonResponse
     {
         $client = $this->getClient();
 
-        $cart = $session->get('cart', []);
-
-        $products = $productRepo->findProductsById(array_keys($cart));
-
-        $subtotal = 0;
-
-        $items = [];
-        foreach ($products as $product) {
-            $subtotal += round($product->getPrice()) * $cart[$product->getId()->__toString()];
-            $items[] = [
-                'name' => $product->getName(),
-                'description' => $product->getCategory()->getTitle(),
-                'quantity' => (string) $cart[$product->getId()->__toString()],
-                'unit_amount' => [
-                    'currency_code' => 'USD',
-                    'value' =>  (string) round($product->getPrice()),
-                ],
-                'category' => 'PHYSICAL_GOODS',
-            ];
-        }
-
-        $address = 'SET_PROVIDED_ADDRESS'; //$this->getUser()->getAddress() ?? 'address of paypal';
-
-        $shippingPrice = ProjectConstants::SHIPPING_PRICE;
-        $currency = ProjectConstants::CURRENCY;
-        $handlingPrice = ProjectConstants::HANDLINH_PRICE;
-        $total = $subtotal + $shippingPrice + $handlingPrice;
-
-        $description = 'DESCRIPTION OF ORDER';
+        extract($cartService->getData());
 
         /** @var array $body */
         $body = $createOrder->buildRequestBody(
@@ -131,7 +105,6 @@ class PaypalController extends AbstractController
             $description
         );
 
-        $errors = [];
         try {
             /** @var mixed */
             $response = $createOrder->createOrder($client, $body);
@@ -147,6 +120,7 @@ class PaypalController extends AbstractController
                 ->setPayee($response->result->purchase_units[0]->payee->email_address)
                 ->setUser($this->getUser())
             ;
+
             $session->clear('cart');
             $user = $this->getUser();
             $user->setCart([]);

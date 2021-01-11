@@ -1,0 +1,16 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Products {% endblock %}
+
+{% block body %}
+
+<div class="container">
+	{{ form_start(form) }}
+    {{ form_row(form.name) }}
+    {{ form_row(form.price) }}
+    {{ form_row(form.description) }}
+    {{ form_row(form.category) }}
+    	<button class="btn">Save</button>
+	{{ form_end(form) }}
+</div>
+{% endblock %}

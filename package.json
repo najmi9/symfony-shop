@@ -22,6 +22,7 @@
         "@popperjs/core": "^2.6.0",
         "apexcharts": "^3.23.0",
         "bootstrap": "^5.0.0-beta1",
-        "chart.js": "^2.9.4"
+        "chart.js": "^2.9.4",
+        "dropzone": "^5.7.2"
     }
 }

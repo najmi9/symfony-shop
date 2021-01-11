@@ -62,3 +62,7 @@ services:
     App\Service\Stripe\StripeService:
         arguments:
             $stripe_secret_key: '%env(resolve:STRIPE_SECRET_KEY)%'
+
+    App\Service\FileUploader:
+        arguments:
+            $projectDir: "%kernel.project_dir%"

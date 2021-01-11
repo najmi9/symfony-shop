@@ -12,7 +12,7 @@ use Stripe\Checkout\Session;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Repository\ProductRepository;
-use App\Service\ProjectConstants;
+use App\Service\CartService;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
@@ -25,26 +25,12 @@ class StripeController extends AbstractController
     /**
      * @Route("/stripe/cretae-session", name="create_checkout_session", methods={"POST"})
      */
-    public function pay(StripeService $stripe, SessionInterface $session, ProductRepository $productRepo, EntityManagerInterface $em): JsonResponse
+    public function pay(StripeService $stripe, SessionInterface $session, 
+    ProductRepository $productRepo, EntityManagerInterface $em, CartService $cartService): JsonResponse
     {
-        $cart = $session->get('cart', []);
-
-        $products = $productRepo->findProductsById(array_keys($cart));
-
-        $subtotal = 0;
-        $images = [];
-
-        foreach ($products as $product) {
-            $subtotal += round($product->getPrice()) * $cart[$product->getId()->__toString()];
-            $images[] = $product->getImage();
-        }
-
-        $shippingPrice = ProjectConstants::SHIPPING_PRICE;
-        $currency = ProjectConstants::CURRENCY;
-        $handlingPrice = ProjectConstants::HANDLINH_PRICE;
-        $total = $subtotal + $shippingPrice + $handlingPrice;
+        extract($cartService->getData());
         try {
-            /** @var Session $session */
+            /** @var Session $stripeSession */
             $stripeSession = $stripe->createSession($total, $images);
 
             $session->clear('cart');

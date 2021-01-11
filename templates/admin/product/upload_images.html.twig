@@ -1,0 +1,36 @@
+{% extends "base.html.twig" %}
+
+
+{% block title %}Products {% endblock %}
+
+{% block stylesheets %}
+	{{ parent() }}
+	{{ encore_entry_link_tags('admin-product') }}
+{% endblock %}
+
+
+{% block body %}
+
+<div class="container">
+				  <div class="form-group dropzone-css">
+                <div id="js-dropzone">
+                <div class="dz-preview dz-file-preview">
+                    <div class="dropzone dropzone-default dropzone-success">
+                        <div class="dropzone dropzone-msg dz-message needsclick">
+                            <h3 class="dropzone-msg-title needsclick">Drop files here or click to upload.</h3>
+                            <span class="dropzone-msg-desc">Only image, pdf and psd files are allowed for upload</span>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+	</div>
+
+	<div class="product-id" data-id="{{ id}}"></div>
+	<div class="toasts"></div>
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	{{ encore_entry_script_tags('admin-product') }}
+{% endblock %}
