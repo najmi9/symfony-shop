@@ -29,7 +29,7 @@ class LogoutListener
 
         $user->setCart($cart);
 
-        $this->session->clear('cart');
+        $this->session->clear();
         // Persist the data to database.
         $this->em->persist($user);
         $this->em->flush();

@@ -21,7 +21,7 @@ class SearchController extends AbstractController
         $q = $request->query->get('q');
         $min = (float) $request->query->get('min', null);
         $max = (float) $request->query->get('max', null);
-    	$categories = (array) $request->query->get('categories', []);
+    	$categories = (array) $request->query->get('categories') ?? []; 
 
     	$products = $productRepo->findByName($q, $min, $max, $categories);
 

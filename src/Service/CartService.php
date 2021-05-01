@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\Service\ProjectConstants;
 use App\Repository\ProductRepository;
+use App\Service\ProjectConstants;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class CartService
@@ -19,13 +19,6 @@ class CartService
         $this->productRepo = $productRepo;
     }
 
-    /**
-     * merge two tables
-     *
-     * @param array<{string:int}> $cart1 ['key' => 124, 'keyprim' => 1]
-     * @param array<{string:int}> $cart2 ['key' => 4, 'key1' => 1]
-     * @return array<{string:int}>
-     */
     public function mergeCartsAfterLogin(array $cart1, array $cart2): array
     {
         $totalCart = [];
@@ -84,17 +77,6 @@ class CartService
 
         $description = 'DESCRIPTION OF ORDER';
 
-        return [
-            'total' => $total,
-            'currency' => $currency,
-            'items' => $items,
-            'images' => $images,
-            'handlingPrice' => $handlingPrice,
-            'description' => $description,
-            'shippingPrice' => $shippingPrice,
-            'address' => $address,
-            'subtotal' => $subtotal
-        ];
+        return compact('total', 'currency', 'items', 'images', 'handlingPrice', 'description', 'shippingPrice', 'address', 'subtotal');
     }
-
 }

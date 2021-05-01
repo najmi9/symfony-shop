@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Service\Paypal;
 
 use PayPalCheckoutSdk\Core\PayPalHttpClient;
@@ -7,7 +9,6 @@ use PayPalCheckoutSdk\Orders\OrdersGetRequest;
 
 class GetOrderService
 {
-
     /**
      * This function can be used to retrieve an order by passing order Id as argument.
      */

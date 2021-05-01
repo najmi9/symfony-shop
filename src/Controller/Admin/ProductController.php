@@ -29,8 +29,6 @@ class ProductController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $product->setCreatedAt(new \DateTime())->setUpdatedAt(new \DateTime());
-
             $em->persist($product);
             $em->flush();
 
@@ -58,10 +56,9 @@ class ProductController extends AbstractController
      * @Route("/upload-image/{id}", name="upload_image", methods={"POST"})
      */
     public function uploadImage(string $id=null, Request $request, FileUploader $fileUploader,
-     EntityManagerInterface $em, ProductRepository $productRepo): JsonResponse
+     EntityManagerInterface $em, ProductRepository $productRepo)
     {
-        /** @var UploadedFile $file */
-        $file = $request->files->get('file');
+        /* $file = $request->files->get('file');
         
         $product = $productRepo->find($id);
 
@@ -78,7 +75,7 @@ class ProductController extends AbstractController
 
         return $this->json([
             'message' => 'Succcess',
-        ], 201);
+        ], 201); */
     }
 
     /**
@@ -87,7 +84,7 @@ class ProductController extends AbstractController
     public function deleteImages(int $id, int $index, FileUploader $fileUploader, 
     EntityManagerInterface $em, ProductRepository $productRepo)
     {
-        $product = $productRepo->findOneById($id);
+        /* $product = $productRepo->findOneById($id);
         $images = $product->getImages();
         $toDelete = array_splice($images, $index, 1);
         $product->setImages($images);
@@ -96,7 +93,7 @@ class ProductController extends AbstractController
         $em->flush();
         $this->addFlash('success', 'Image deleted Successfly.');
 
-        return $this->redirectToRoute('website_edit');
+        return $this->redirectToRoute('website_edit'); */
     }
     
 }

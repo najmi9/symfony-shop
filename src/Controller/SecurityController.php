@@ -1,21 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
-use App\Service\MailService;
+use App\Entity\User;
 use App\Form\EmailFormType;
-use App\Repository\UserRepository;
 use App\Form\ResetPasswordType;
+use App\Repository\UserRepository;
+use App\Service\MailService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Csrf\TokenGenerator\TokenGeneratorInterface;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 /**
  * @Route("/auth")
@@ -124,14 +127,8 @@ class SecurityController extends AbstractController
     /**
      * @Route("/reset-password/{token}", name="reset_password", methods={"GET", "POST"})
      */
-    public function resetPassword(
-        Request $request,
-        string $token,
-        UserRepository $userRepo,
-        EntityManagerInterface $em,
-        UserPasswordEncoderInterface $encoder
-    ): Response {
-        $user = $userRepo->findOneBy(['confirmationToken' => $token]);
+    public function resetPassword(Request $request, User $user, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder): Response
+    {
         if (!$user) {
             $this->addFlash('danger', 'User Not Found');
 
@@ -160,12 +157,8 @@ class SecurityController extends AbstractController
      *
      * @Route("/confirm-email/{token}", name="email_confirmation", methods={"GET"})
      */
-    public function confirmEmail(
-        string $token,
-        EntityManagerInterface $em,
-        UserRepository $userRepo
-    ): Response {
-        $user = $userRepo->findOneBy(['confirmationToken' => $token]);
+    public function confirmEmail(User $user,  EntityManagerInterface $em): Response
+    {
         if (!$user) {
             $this->addFlash('danger', 'User Not Found');
 

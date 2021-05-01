@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Repository\UserRepository;
@@ -110,7 +112,6 @@ class User implements UserInterface
     {
         $this->likes = new ArrayCollection();
         $this->orders = new ArrayCollection();
-        $this->payments = new ArrayCollection();
         $this->comments = new ArrayCollection();
     }
 
@@ -181,6 +182,7 @@ class User implements UserInterface
     public function getSalt()
     {
         // not needed when using the "bcrypt" algorithm in security.yaml
+        return null;
     }
 
     /**

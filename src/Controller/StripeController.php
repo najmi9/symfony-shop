@@ -1,19 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
+use App\Service\CartService;
 use App\Service\Stripe\StripeService;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Stripe\Checkout\Session;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use App\Repository\ProductRepository;
-use App\Service\CartService;
-use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * stripe controller
@@ -25,15 +26,15 @@ class StripeController extends AbstractController
     /**
      * @Route("/stripe/cretae-session", name="create_checkout_session", methods={"POST"})
      */
-    public function pay(StripeService $stripe, SessionInterface $session, 
-    ProductRepository $productRepo, EntityManagerInterface $em, CartService $cartService): JsonResponse
+    public function pay(StripeService $stripe, SessionInterface $session, EntityManagerInterface $em, CartService $cartService): JsonResponse
     {
-        extract($cartService->getData());
+        $data = $cartService->getData();
+        extract($data);
         try {
             /** @var Session $stripeSession */
             $stripeSession = $stripe->createSession($total, $images);
 
-            $session->clear('cart');
+            $session->clear();
             $user = $this->getUser();
             $user->setCart([]);
             $em->persist($user);

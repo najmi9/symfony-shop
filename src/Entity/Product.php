@@ -67,6 +67,11 @@ class Product
      */
     private $updatedAt;
 
+    /**
+     * @ORM\Column(type="integer", options={"default": 10})
+     */
+    private $availableQuantity = 10;
+
     public function __construct()
     {
         $this->likes = new ArrayCollection();
@@ -225,6 +230,18 @@ class Product
     public function setUpdatedAt(): self
     {
         $this->updatedAt = new \DateTime();
+
+        return $this;
+    }
+
+    public function getAvailableQuantity(): ?int
+    {
+        return $this->availableQuantity;
+    }
+
+    public function setAvailableQuantity(int $availableQuantity): self
+    {
+        $this->availableQuantity = $availableQuantity;
 
         return $this;
     }

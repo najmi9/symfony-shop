@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,7 +16,7 @@ class ProductsController extends AbstractController
      */
     public function show(Product $product): Response
     {
-        return $this->render('products/index.html.twig', [
+        return $this->render('products/show.html.twig', [
             'product' => $product,
         ]);
     }

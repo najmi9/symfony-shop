@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ product.name }}
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between" style="background: lightgray;">
+                <h4 class="text-primary"> {{ product.name }} </h4>
+                <h4 class="font-weight-bolder text-primary">{{ product.price }} $</h4>
+            </div>
+            <div class="card-body row">
+                <div class="col-lg-6 card-media text-center">
+                    <img src="{{ product.image }}" alt="product.name" width="100%" height="100%">
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card-content border border-2 p-2 rounded shadow-lg mb-2">
+                        <b>Description:</b> {{ product.description }}
+                    </div>
+                    <div class="border border-2 p-2 rounded shadow-lg mb-2">
+                        <b>Category:</b> {{ product.category.title }}
+                    </div>
+                    <div class="border border-2 p-2 rounded shadow-lg mb-2">
+                        <b>Categroy Description: </b>{{ product.category.description }}
+                    </div>
+
+                    <div class="border border-2 p-2 rounded shadow-lg mb-2">
+                        <b>Available Quantity : </b> <span class="badge bg-primary">{{ product.availableQuantity }}</span>
+                    </div>
+
+                    <div class="border border-2 p-2 rounded shadow-lg mb-2">
+                        <b>Likes : </b> <span class="badge bg-primary">{{ product.likes|length == 0 ? 'No likes': product.likes|length }}</span>
+                    </div>
+    
+                    <div class="border border-2 p-2 rounded shadow-lg mb-2">
+                        <b>Created At : </b> {{ product.createdAt|date }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

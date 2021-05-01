@@ -21,7 +21,7 @@ class OrderController extends AbstractController
      */
     public function index(OrderRepository $orderRepo, Request $request, PaginatorInterface $paginator, SessionInterface $session): Response
     {
-    	$orders = $orderRepo->findByUser($this->getUser());
+    	$orders = $orderRepo->findBy(['user' => $this->getUser()]);
        // dd($orders);
         $orders = $paginator->paginate(
             $orders, 

@@ -79,7 +79,7 @@ class AppLoginAuthenticator extends AbstractFormLoginAuthenticator implements Pa
 
     public function checkCredentials($credentials, UserInterface $user)
     {
-        if ($user->getGoogleId() && !$user->getPassword()) {
+        if ($user instanceof User && $user->getGoogleId() && !$user->getPassword()) {
             // fail authentication with a custom error
             throw new CustomUserMessageAuthenticationException('This account can login only by Google.');
         }

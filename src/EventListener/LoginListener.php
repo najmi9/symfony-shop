@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\EventListener;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use App\Entity\User;
 use App\Service\CartService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 
 
 class LoginListener
@@ -24,7 +24,7 @@ class LoginListener
         $this->cartService = $cartService;
     }
 
-    public function onSecurityInteractiveLogin(InteractiveLoginEvent $event)
+    public function onSecurityInteractiveLogin(InteractiveLoginEvent $event): void
     {
          /** @var User $user*/
         $user = $event->getAuthenticationToken()->getUser();

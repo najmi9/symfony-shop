@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Service\Stripe;
 
+use Stripe\Checkout\Session;
 use Stripe\Stripe;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Stripe\Checkout\Session;
 
 class StripeService
 {

@@ -1,27 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\Order;
 use App\Repository\OrderRepository;
+use App\Service\CartService;
 use App\Service\Paypal\CreateOrderService;
+use App\Service\ProjectConstants;
 use Doctrine\ORM\EntityManagerInterface;
 use PayPalCheckoutSdk\Core\PayPalHttpClient;
-use Symfony\Component\HttpFoundation\Request;
 use PayPalCheckoutSdk\Core\SandboxEnvironment;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Routing\Annotation\Route;
 use PayPalCheckoutSdk\Orders\OrdersCaptureRequest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use App\Service\CartService;
-use App\Service\ProjectConstants;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * Pay Controller
- * 
+ * Pay Controller.
+ *
  * @IsGranted("ROLE_USER")
  * @Route("/paypal", name="paypal_")
  */
@@ -30,7 +32,7 @@ class PaypalController extends AbstractController
     /**
      * @Route("/send-payment/{total}", name="send_payment", methods={"GET"})
      */
-    public function pay(string $total, SessionInterface $session): Response
+    public function pay(float $total, SessionInterface $session): Response
     {
 
         if ($total <= 0 || $total > 10000) {
@@ -48,7 +50,7 @@ class PaypalController extends AbstractController
     }
 
     /**
-     * capture the money
+     * capture the money.
      *
      * @Route("/capture-payment", name="capture_payment", methods={"POST"})
      */
@@ -88,8 +90,8 @@ class PaypalController extends AbstractController
     EntityManagerInterface $em, CartService $cartService): JsonResponse
     {
         $client = $this->getClient();
-
-        extract($cartService->getData());
+        $cartService = $cartService->getData();
+        extract($cartService);
 
         /** @var array $body */
         $body = $createOrder->buildRequestBody(
@@ -119,7 +121,7 @@ class PaypalController extends AbstractController
                 ->setUser($this->getUser())
             ;
 
-            $session->clear('cart');
+            $session->clear();
             $user = $this->getUser();
             $user->setCart([]);
             $em->persist($user);
