@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Repository\ProductRepository;
@@ -16,9 +18,10 @@ class HomeController extends AbstractController
     /**
      * @Route("/", name="home")
      */
-    public function index(ProductRepository $productRepo, SessionInterface $session, PaginatorInterface $paginator, Request $request, CategoryRepository $categoryRepo): Response
+    public function index(ProductRepository $productRepo, SessionInterface $session, PaginatorInterface $paginator, Request $request,
+    CategoryRepository $categoryRepo): Response
     {
-        $products = $productRepo->findAll();
+        $products = $productRepo->createQueryBuilder('p')->getQuery();
         $products = $paginator->paginate(
             $products, 
             $request->query->getInt('page', 1), /*page number*/

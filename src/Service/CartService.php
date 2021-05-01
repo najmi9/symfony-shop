@@ -60,11 +60,11 @@ class CartService
         $images = [];
 
         foreach ($products as $product) {
-            $subtotal += round($product->getPrice()) * $cart[$product->getId()->__toString()];
+            $subtotal += round($product->getPrice()) * $cart[$product->getId()];
             $items[] = [
                 'name' => $product->getName(),
                 'description' => $product->getCategory()->getTitle(),
-                'quantity' => (string) $cart[$product->getId()->__toString()],
+                'quantity' => (string) $cart[$product->getId()],
                 'unit_amount' => [
                     'currency_code' => 'USD',
                     'value' =>  (string) round($product->getPrice()),

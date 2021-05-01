@@ -6,7 +6,6 @@ namespace App\EventListener;
 
 use App\Entity\User;
 use App\Service\MailService;
-use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Csrf\TokenGenerator\TokenGeneratorInterface;
 
@@ -26,12 +25,12 @@ class UserListener
         $this->tokenGenerator = $tokenGenerator;
     }
 
-    public function preUpdate(User $user, LifecycleEventArgs $event): void
+    public function preUpdate(User $user): void
     {
         $user->setUpdatedAt(new \DateTime());
     }
 
-    public function prePersist(User $user, LifecycleEventArgs $event): void
+    public function prePersist(User $user): void
     {
         $token = $this->tokenGenerator->generateToken();
         $user->setCreatedAt(new \DateTime())
@@ -40,7 +39,7 @@ class UserListener
         ;
     }
 
-    public function postPersist(User $user, LifecycleEventArgs $event): void
+    public function postPersist(User $user): void
     {
         $this->mailer->sendEmail(
             $user->getEmail(),

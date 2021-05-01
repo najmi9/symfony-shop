@@ -56,11 +56,7 @@ class ProductRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('p');
         return $qb->andWhere('p IN (:ids)')
-                ->setParameter('ids', 
-                    array_map(function ($id) {
-                        return Uuid::fromString($id)->toBinary();
-                    }
-                , $ids))
+                ->setParameter('ids', $ids)
                 ->getQuery()
                 ->getResult()
         ;

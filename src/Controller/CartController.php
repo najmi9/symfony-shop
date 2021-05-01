@@ -82,7 +82,7 @@ class CartController extends AbstractController
         // calculate the total price of products
         $total = 0;
         foreach ($products as $product) {
-            $total += $product->getPrice() * $cart[$product->getId()->__toString()];
+            $total += $product->getPrice() * $cart[$product->getId()];
         }
         
         return $this->render('cart/cart.html.twig', [
