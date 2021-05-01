@@ -57,7 +57,6 @@ jobs:
             yarn run eslint assets/js/components/
             yarn run eslint assets/js/pages/
             yarn run encore production
-
 workflows:
   version: 2
   notify_deploy:
