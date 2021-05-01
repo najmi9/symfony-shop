@@ -72,7 +72,7 @@ class Product
         $this->reviews = new ArrayCollection();
     }
 
-    public function getId(): ?UuidV4
+    public function getId()
     {
         return $this->id;
     }
