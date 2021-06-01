@@ -1,36 +1,97 @@
 {% extends "base.html.twig" %}
 
-
-{% block title %}Products {% endblock %}
+{% block title %}Product Media {% endblock %}
 
 {% block stylesheets %}
-	{{ parent() }}
-	{{ encore_entry_link_tags('admin-product') }}
+    {{ parent() }}
+    {{ encore_entry_link_tags('admin-product') }}
 {% endblock %}
 
 
 {% block body %}
 
 <div class="container">
-				  <div class="form-group dropzone-css">
-                <div id="js-dropzone">
-                <div class="dz-preview dz-file-preview">
-                    <div class="dropzone dropzone-default dropzone-success">
-                        <div class="dropzone dropzone-msg dz-message needsclick">
-                            <h3 class="dropzone-msg-title needsclick">Drop files here or click to upload.</h3>
-                            <span class="dropzone-msg-desc">Only image, pdf and psd files are allowed for upload</span>
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <h3 class="card-label">
+                    Product Media
+                </h3>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-4">
+                    <div class="form-group dropzone-css">
+                        <div id="js-cover-dropzone">
+                            <div class="dz-preview dz-file-preview">
+                                <div class="dropzone dropzone-default dropzone-success">
+                                    <div class="dropzone dropzone-msg dz-message needsclick">
+                                        <h3 class="dropzone-msg-title needsclick">Drop Cover Image.</h3>
+                                        <span class="dropzone-msg-desc">Only images allowed for upload</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <div class="col-8">
+                    <div class="form-group dropzone-css">
+                        <div id="js-dropzone">
+                            <div class="dz-preview dz-file-preview">
+                                <div class="dropzone dropzone-default dropzone-success">
+                                    <div class="dropzone dropzone-msg dz-message needsclick">
+                                        <h3 class="dropzone-msg-title needsclick">Drop files here or click to upload.</h3>
+                                        <span class="dropzone-msg-desc">Only images allowed for upload</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-	</div>
 
-	<div class="product-id" data-id="{{ id}}"></div>
-	<div class="toasts"></div>
+            <div class="my-2">
+               {% if product.image %}
+                <a href="{{ path('admin_products_delete_image', {id: product.id, image: product.image}) }}" class="btn btn-sm btn-danger">
+                    <i class="fas fa-trash-alt"></i>
+                </a>
+               {% endif %}
+                <img src="{{ asset('/uploads/products/' ~ product.id ~ '/' ~ product.image)  }}" alt="{{ product.name }}" width="100%" height="90%">
+            </div>
+
+            <div class="mt-2 border-primary border p-2">
+                <div class="row">
+                    {% for img in product.images %}
+                        <div class="col-lg-3 col-md-6">
+                            <a href="{{ path('admin_products_delete_image', {id: product.id, image: img}) }}" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                            <img src="{{ asset('/uploads/products/' ~ product.id ~ '/' ~ img)  }}" alt="{{ product.name }}" width="100%" height="90%">
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <a href="{{ path('products_show', {id: product.id}) }}" class="btn btn-primary">
+                <i class="fas fa-rocket text-warning"></i>Product Details
+            </a>
+
+             <a href="{{ path('admin_products_new') }}" class="btn btn-success ml-2">
+                <i class="fas fa-plus"></i>New Product
+            </a>
+        </div>
+
+    </div>
+    <div class="product-id" data-id="{{ product.id}}"></div>
+    <div class="toasts"></div>
+</div>
 {% endblock %}
 
 {% block javascripts %}
-	{{ parent() }}
-	{{ encore_entry_script_tags('admin-product') }}
+    {{ parent() }}
+    {{ encore_entry_script_tags('admin-product') }}
 {% endblock %}

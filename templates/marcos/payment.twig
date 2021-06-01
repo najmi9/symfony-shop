@@ -1,0 +1,66 @@
+{% macro status(status) %}
+    {% if status == 'CREATED' %}
+        <span class="badge bg-warning"> {{ status }} </span>
+    {% elseif status == 'COMPLETED'%}
+        <span class="badge bg-success"> {{ status }} </span>
+    {% elseif status == 'CANCLED'%}
+        <span class="badge bg-danger"> {{ status }} </span>
+    {% else %}
+        <span class="badge bg-secondary"> {{ status }} </span>
+    {% endif %}
+{% endmacro %}
+
+{% macro isOk(status) %}
+    {% if status %}
+        <i class="fas fa-double-check text-success fw-bolder"></i>
+    {% else %}
+        <i class="fas fa-exclamation-circle text-danger fw-bolder"></i>
+    {% endif %}
+{% endmacro %}
+
+{% macro order(order) %}
+    <div class="p-2 rounded border border-3 my-1 bg-light">
+        <div class="d-flex justify-content-between border-bottom mb-2 p-2">
+            <span>
+                <span class="fw-bolder">
+                   Total: {{  order.amount }} 
+                </span>
+                <span class="text-success fw-bold">{{ order.currency }}</span>
+            </span>
+
+            {% if order.link is defined %}
+                <span><a href="{{ order.link }}" target="_blank" class="btn btn-sm btn-primary" rel="noopener noreferrer">
+                    <i class="fas fa-rocket text-warning"></i> Pay
+                </a></span>
+            {% endif %}
+
+            <small class="text-muted">{{ order.date|date('d-m-Y H:i:s')  }}</small>
+        </div>
+
+        <div class="mt-1 row">
+            {% for product in order.products %}
+                <div class="col">
+                    <div class="float-right">
+                        <img src="{{ asset('uploads/products/' ~ product.id ~ '/' ~ product.image) }}"
+                        alt="{{ product.name }}" width="100%" height="100%">
+                    </div>
+                    <div class="border p-2 rounded">
+                        <h5 class="text-primary border-bottom pb-2 border-2">{{ product.name }}</h5>
+                        <p>
+                            Price : <span class="text-italic fw-bolder text-primary">{{ product.price }} {{ order.currency }}</span>
+                        </p>
+                        <p>Quantity : <span class="badge bg-success">{{ product.quantity }}</span></p>
+                        <p>
+                            Subtotal : <span class="fw-bolder">{{ product.price * product.quantity }} {{ order.currency }}</span>
+                        </p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="border-top p-2 text-muted mt-2">
+            <i class="fas fa-home"></i> Shipping Address: {{ app.user.address }} </br>
+            <i class="fas fa-clock"></i> Will Delevery At: {{ order.deliveredAt|date("d-m-Y") }}
+        </div>
+    </div>
+{% endmacro %}

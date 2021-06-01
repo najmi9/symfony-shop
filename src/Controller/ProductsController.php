@@ -9,10 +9,13 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Product;
 
+/**
+ * @Route("/products", name="products_")
+ */
 class ProductsController extends AbstractController
 {
     /**
-     * @Route("/product/{id}", name="product_show")
+     * @Route("/{id}/details", name="show", methods={"GET"})
      */
     public function show(Product $product): Response
     {

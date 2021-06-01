@@ -47,11 +47,17 @@ class CartController extends AbstractController
      * @Route("/cart/delete-product/{id}", name="cart_delete", methods={"GET"})
      * @Route("/cart/add-product/{product}", name="cart_add_product", methods={"GET"})
      */
-    public function cart(string $id = null, string $product=null, SessionInterface $session, 
-    ProductRepository $productRepo, EntityManagerInterface $em): Response
+    public function cart(string $id = null, string $product=null, SessionInterface $session, ProductRepository $productRepo, EntityManagerInterface $em, Request $request): Response
     {   
         // get the cart from the session
         $cart = $session->get('cart', []);
+
+        // buy now a product
+        if ($request->query->get('order', false)) {
+           $productId = $request->query->get('id');
+           $cart[$productId] = 1;
+        }
+
         
         // add a product to the cart
         if ($product) {

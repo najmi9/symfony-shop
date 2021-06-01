@@ -4,7 +4,44 @@
 
 
 {% block body %}
-	
-</div>
-
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <h1 class="card-label">
+                        Products
+                    </h1>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead class="thead">
+                        <th> #ID </th>
+                        <th> Name </th>
+                        <th> Count </th>
+                        <th> Price </th>
+                        <th> Original Price </th>
+                        <th> Is Enabled </th>
+                        <th>Actions</th>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                           <tr>
+                                <td> <img src="{{ asset('/uploads/products/' ~ product.id ~ '/' ~ product.image) }}" width="50" height="50"> </td>
+                                <td> {{ product.name }} </td>
+                                <td> {{ product.availableQuantity }} </td>
+                                <td> {{ product.price }} </td>
+                                <td> {{ product.originalPrice }} </td>
+                                <td> {{ product.isEnabled }} </td>
+                                <td>
+                                    <a href="{{ path('admin_products_delete', {id: product.id}) }}" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></a>
+                                    <a href="{{ path('admin_products_edit', {id: product.id}) }}" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></a>
+                                </td>
+                           </tr> 
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 {% endblock %}

@@ -1,0 +1,65 @@
+
+{% from "marcos/payment.twig" import status, isOk %}
+{% extends "base.html.twig" %}
+
+
+{% block title %}Admin|Orders{% endblock %}
+
+{% block body %}
+    <div class="mx-2">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <h3 class="card-label">
+                        Orders List
+                    </h3>
+                </div>
+            </div>
+            <div class="card-body w-100">
+                <table class="table">
+                    <thead>
+                        <th>#ID</th>
+                        <th>Status</th>
+                        <th>Fee</th>
+                        <th>Amount</th>
+                        <th>Currency</th>
+                        <th>Payee</th>
+                        <th>Customer Email</th>
+                        <th>Created At</th>
+                        <th>Delivered At</th>
+                        <th>Address</th>
+                        <th> Shipped </th>
+                        <th>Confirmed</th>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            <tr>
+                                <td>{{ order.id }}</td>
+                                <td>{{ status(order.status) }}</td>
+                                <td>{{ order.fee }}</td>
+                                <th>{{ order.amount }}</th>
+                                <td>{{ order.currency|default('DH') }}</td>
+                                <td>{{ order.payee }}</td>
+                                <td>{{ order.user ? order.user.email : order.customer.email  }}</td>
+                                <th>{{ order.createdAt|date('d-m-Y H:i') }}</th>
+                                <th> {{ order.deliveredAt|date("d-m-Y H:s") }} </th>
+                                <td> {{ order.user ? order.user.address : order.customer.address }} </td>
+                                <th> {{ isOk(order.shipped) }} </th>
+                                <th> {{ isOk(order.confirmed) }} </th>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center font-weight-bolder">No Order Created</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer text-center">
+                <div class="navigation">
+                    {{ knp_pagination_render(orders) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

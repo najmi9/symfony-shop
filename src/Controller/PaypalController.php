@@ -4,16 +4,19 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\Customer;
 use App\Entity\Order;
 use App\Repository\OrderRepository;
 use App\Service\CartService;
+use App\Service\MailService;
 use App\Service\Paypal\CreateOrderService;
+use App\Service\Paypal\PaymentFailedException;
 use App\Service\ProjectConstants;
 use Doctrine\ORM\EntityManagerInterface;
 use PayPalCheckoutSdk\Core\PayPalHttpClient;
+use PayPalCheckoutSdk\Core\ProductionEnvironment;
 use PayPalCheckoutSdk\Core\SandboxEnvironment;
 use PayPalCheckoutSdk\Orders\OrdersCaptureRequest;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,36 +25,78 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * Pay Controller.
- *
- * @IsGranted("ROLE_USER")
  * @Route("/paypal", name="paypal_")
  */
 class PaypalController extends AbstractController
 {
     /**
-     * @Route("/send-payment/{total}", name="send_payment", methods={"GET"})
+     * @Route("/send-payment/{total}", name="send_payment", methods={"GET", "POST"})
      */
-    public function pay(float $total, SessionInterface $session): Response
+    public function pay(float $total): Response
     {
-
-        if ($total <= 0 || $total > 10000) {
-            $this->addFlash("warning", "Total should not be negative or null or greate than 10000 .");
-
-            return $this->redirectToRoute('cart');
-        }
-
         $shippingPrice = ProjectConstants::SHIPPING_PRICE;
-
         $handlingPrice = ProjectConstants::HANDLINH_PRICE;
         $total = $total + $shippingPrice + $handlingPrice;
 
-        return $this->render('paypal/pay.html.twig', compact('total'));
+        return $this->render('paypal/pay.html.twig', [
+            'total' => $total,
+            'PAYPAL_ID' => $this->getParameter('paypal_id'),
+            'customer' => $this->getUser(),
+        ]);
     }
 
     /**
-     * capture the money.
-     *
+     * @Route("/create-order/{id}", name="create_order", methods={"POST"}, defaults={"id": null})
+     */
+    public function createOrder(Customer $customer = null, SessionInterface $session, CreateOrderService $createOrder, EntityManagerInterface $em, CartService $cartService): JsonResponse
+    {
+        $user = $this->getUser();
+    
+        if (!$user && !$customer) {
+            return $this->json(['msg' => 'Customer Required.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $client = $this->getClient();
+        $cart = $session->get('cart', []);
+        $payment = $cartService->generatePayment($cart);
+
+        try {
+            /** @var \stdClass $response */
+            $response = $createOrder->createOrder($client, $payment);
+            $order = new Order();
+
+            $order->setAmount($response->result->purchase_units[0]->amount->value)
+                ->setApproveLink($response->result->links[1]->href)
+                ->setCreatedAt(new \DateTime($response->result->create_time))
+                ->setIdentifiant($response->result->id)
+                ->setStatus($response->result->status)
+                ->setPayee($response->result->purchase_units[0]->payee->email_address)
+                ->setUser($user)
+                ->setCart($cart)
+                ->setCurrency($response->result->purchase_units[0]->amount->currency_code);
+            ;
+
+            if ($customer) {
+                $order->setCustomer($customer);
+            }
+
+            $session->clear();
+
+            if ($user) {
+                $user->setCart([]);
+                $em->persist($user);
+            }
+
+            $em->persist($order);
+            $em->flush();
+
+            return $this->json(['id' => $response->result->id]);
+        } catch (PaymentFailedException $e) {
+            return  $this->json(['message' => 'Error of payment '.$e->getMessage()],  Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+    }
+
+    /**
      * @Route("/capture-payment", name="capture_payment", methods={"POST"})
      */
     public function captureOrder(Request $request, EntityManagerInterface $em, OrderRepository $orderRepo): JsonResponse
@@ -64,14 +109,31 @@ class PaypalController extends AbstractController
         // $response->result->id gives the orderId of the order created above
         /** @var Order $order */
         $order = $orderRepo->findOneByIdentifiant($result['orderID']);
-        $request = new OrdersCaptureRequest($result['orderID']);
+    
+        $request = new OrdersCaptureRequest($order->getIdentifiant());
         $request->prefer('return=representation');
 
         // Call API with your client and get a response for your call
-        $client->execute($request);
+        /** @var \stdClass $capture */
+        $capture = $client->execute($request);
+
+        if ('COMPLETED' !== $capture->result->status) {
+            throw new PaymentFailedException('Impossible to capturer this paiement');
+        }
+
+        $payerId = $capture->result->payer->payer_id;
+
+        $capture = $capture->result->purchase_units[0]->payments->captures[0];
 
         // If call returns body in response, you can get the deserialized version from the result attribute of the response
-        $order = $this->updateOrder($order, $result);
+        $order->setUpdatedAt(new \DateTime())
+            ->setStatus('COMPLETED')
+            ->setFacilitatorAccessToken($result['facilitatorAccessToken'])
+            ->setPayeerId($payerId)
+            ->setBillingToken($result['billingToken'])
+            ->setCaptureid($capture->id)
+            ->setFee((float) $capture->seller_receivable_breakdown->paypal_fee->value)
+        ;
 
         $em->persist($order);
         $em->flush();
@@ -84,80 +146,27 @@ class PaypalController extends AbstractController
     }
 
     /**
-     * @Route("/create-order", name="create_order", methods={"POST"})
-     */
-    public function createOrder(SessionInterface $session, CreateOrderService $createOrder, 
-    EntityManagerInterface $em, CartService $cartService): JsonResponse
-    {
-        $client = $this->getClient();
-        $cartService = $cartService->getData();
-        extract($cartService);
-
-        /** @var array $body */
-        $body = $createOrder->buildRequestBody(
-            $items,
-            (string) $subtotal,
-            (string) $total,
-            (string) $shippingPrice,
-            (string) $handlingPrice,
-            $currency,
-            $address,
-            $description
-        );
-
-        try {
-            /** @var mixed */
-            $response = $createOrder->createOrder($client, $body);
-
-            /** @var Order $order */
-            $order = new Order();
-
-            $order->setAmount($response->result->purchase_units[0]->amount->value)
-                ->setApproveLink($response->result->links[1]->href)
-                ->setCreatedAt(new \DateTime($response->result->create_time))
-                ->setIdentifiant($response->result->id)
-                ->setStatus($response->result->status)
-                ->setPayee($response->result->purchase_units[0]->payee->email_address)
-                ->setUser($this->getUser())
-            ;
-
-            $session->clear();
-            $user = $this->getUser();
-            $user->setCart([]);
-            $em->persist($user);
-            $em->persist($order);
-            $em->flush();
-            return $this->json(['id' => $response->result->id]);
-        } catch (\Exception $e) {
-            return  $this->json(['message' => 'Error'], 400);
-        }
-    }
-
-    /**
-     * @Route("/cancel", name="paypal_cancel",  methods={"POST"})
-     */
-    public function onCancel(Request $request)
-    {
-        // logic to do after the cancling the error
-    }
-
-    /**
-     * @Route("/error", name="paypal_error", methods={"POST"})
-     */
-    public function onError(Request $request)
-    {
-        // logic to do if there an error.
-    }
-
-    /**
      * @Route("/paypal-return", name="return_url") 
      */
-    public function returnAfterPayment(Request $request): Response
+    public function returnAfterPayment(Request $request, OrderRepository $orderRepo, EntityManagerInterface $em): Response
     {
-        $payerId = $request->query->get('PayerID');
+        // update the order to be be completed.
         $token = $request->query->get('token');
 
-        // logic afetr the user approe the payment.
+        if ($this->getParameter('env') == 'dev' || $this->getParameter('env') == 'test') {
+            $url = "https://www.sandbox.paypal.com/checkoutnow?token={$token}";
+        } else {
+            $url = "https://www.paypal.com/checkoutnow?token={$token}";
+        }
+ 
+        $order = $orderRepo->findOneBy(['approveLink' => $url]);
+ 
+        $order->setStatus('COMPLETED')
+            ->setUpdatedAt(new \DateTime())
+        ;
+ 
+        $em->persist($order);
+        $em->flush();
         $this->addFlash('success', 'Thank you for your payment');
 
         return $this->redirectToRoute('home');
@@ -166,38 +175,66 @@ class PaypalController extends AbstractController
     /**
      * @Route("/paypal-cancel", name="cancel_url") 
      */
-    public function canceledPayment(Request $request): Response
+    public function canceledPayment(Request $request, OrderRepository $orderRepo, EntityManagerInterface $em): Response
     {
+        // update the order to be be completed.
         $token = $request->query->get('token');
-        // logic to do after the user cancel the payment
 
-        $this->addFlash('danger', 'payment Canceled');
+        if ($this->getParameter('env') == 'dev' || $this->getParameter('env') == 'test') {
+            $url = "https://www.sandbox.paypal.com/checkoutnow?token={$token}";
+        }else {
+            $url = "https://www.paypal.com/checkoutnow?token={$token}";
+        }
+
+        $order = $orderRepo->findOneBy(['approveLink' => $url]);
+
+        $order->setStatus('CANCLED')
+            ->setUpdatedAt(new \DateTime())
+        ;
+
+        $em->persist($order);
+        $em->flush();
+
+        $this->addFlash('danger', 'Payment Canceled');
 
         return $this->redirectToRoute('home');
     }
 
-    private function updateOrder(Order $order, array $result): Order
-    {
-        $order->setUpdatedAt(new \DateTime())
-            ->setStatus('CAPTURED')
-            ->setFacilitatorAccessToken($result['facilitatorAccessToken'] ?? '')
-            ->setPayeerId($result['payerID'])
-            ->setPaymentId($result['paymentID'])
-            ->setBillingToken($result['billingToken'] ?? '');
-        return $order;
-    }
-
     private function getClient(): PayPalHttpClient
     {
-        /*if ($this->getParameter('env') == 'dev' || $this->getParameter('env') == 'test') {
+        if ($this->getParameter('env') == 'dev' || $this->getParameter('env') == 'test') {
             $env = new SandboxEnvironment($this->getParameter('paypal_id'), $this->getParameter('paypal_secret'));
-        }else {
+        } else {
              $env = new ProductionEnvironment($this->getParameter('paypal_id'), $this->getParameter('paypal_secret'));
         }
-        */
 
-        $env = new SandboxEnvironment($this->getParameter('paypal_id'), $this->getParameter('paypal_secret'));
+        return new PayPalHttpClient($env);
+    }
 
-        return $client = new PayPalHttpClient($env);
+    /**
+     * @Route("/{identifiant}/order-cancled", name="order_cancled", methods={"POST"})
+     */
+    public function orderCancled(Order $order, EntityManagerInterface $em): JsonResponse
+    {
+        $order->setStatus('CANCLED')
+            ->setUpdatedAt(new \DateTime())
+        ;
+
+        $em->persist($order);
+        $em->flush();
+
+        return $this->json('Success');
+    }
+
+     /**
+     * @Route("/order-error", name="order_cancled", methods={"POST"})
+     */
+    public function orderError(Request $request,  MailService $mailService): JsonResponse
+    {
+        /* $mailService->sendEmail($this->getParameter('sender_email'), 'Error In Paypal Payment', 'emails/paypal_error.html.twig', [
+            'msg' => $request->getContent(),
+        ]); */
+
+        return $this->json('Success');
     }
 }

@@ -50,7 +50,7 @@ class Order
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="orders")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=true)
      */
     private $user;
 
@@ -78,6 +78,46 @@ class Order
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $billingToken;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Customer::class, inversedBy="orders")
+     */
+    private $customer;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $captureid;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $fee;
+
+    /**
+     * @ORM\Column(type="array")
+     */
+    private array $cart = [];
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private bool $shipped = false;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private bool $confirmed = false;
+
+    /**
+     * @ORM\Column(type="string", length=255, options={"defaults": "DH"})
+     */
+    private $currency = 'DH';
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $deliveredAt;
 
     public function getId(): ?int
     {
@@ -224,6 +264,102 @@ class Order
     public function setBillingToken(?string $billingToken): self
     {
         $this->billingToken = $billingToken;
+
+        return $this;
+    }
+
+    public function getCustomer(): ?Customer
+    {
+        return $this->customer;
+    }
+
+    public function setCustomer(?Customer $customer): self
+    {
+        $this->customer = $customer;
+
+        return $this;
+    }
+
+    public function getCaptureid(): ?string
+    {
+        return $this->captureid;
+    }
+
+    public function setCaptureid(?string $captureid): self
+    {
+        $this->captureid = $captureid;
+
+        return $this;
+    }
+
+    public function getFee(): ?float
+    {
+        return $this->fee;
+    }
+
+    public function setFee(float $fee): self
+    {
+        $this->fee = $fee;
+
+        return $this;
+    }
+
+    public function getCart(): ?array
+    {
+        return $this->cart;
+    }
+
+    public function setCart(array $cart): self
+    {
+        $this->cart = $cart;
+
+        return $this;
+    }
+
+    public function getShipped(): ?bool
+    {
+        return $this->shipped;
+    }
+
+    public function setShipped(bool $shipped): self
+    {
+        $this->shipped = $shipped;
+
+        return $this;
+    }
+
+    public function getConfirmed(): ?bool
+    {
+        return $this->confirmed;
+    }
+
+    public function setConfirmed(bool $confirmed): self
+    {
+        $this->confirmed = $confirmed;
+
+        return $this;
+    }
+
+    public function getCurrency(): ?string
+    {
+        return $this->currency;
+    }
+
+    public function setCurrency(string $currency): self
+    {
+        $this->currency = $currency;
+
+        return $this;
+    }
+
+    public function getDeliveredAt(): ?\DateTimeInterface
+    {
+        return $this->deliveredAt;
+    }
+
+    public function setDeliveredAt(?\DateTimeInterface $deliveredAt): self
+    {
+        $this->deliveredAt = $deliveredAt;
 
         return $this;
     }

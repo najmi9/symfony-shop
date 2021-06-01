@@ -1,0 +1,41 @@
+{% macro shippingDataForm(customer) %}
+
+     <span id="customerId" data-user="{{ customer.id|default(null) }}"></span>
+    <form name="customer" method="post">
+
+        {{ _self.field('text', customer.name|default(''), 'name', 'John Doe', 'Name', customer, 'max="10"') }}
+        
+        {{ _self.field('email', customer.email|default(''), 'email', 'john@doe.com', 'Email', customer) }}
+       
+        {{ _self.field('number', customer.mobile|default(''), 'mobile', '07 62 95 17 42', 'Mobile', customer, ' maxlength="10" minlength="10"') }}
+        
+        {{ _self.field('text', customer.city|default(''), 'city', 'Casabalanca', 'City', customer, ' minlength="3"') }}
+       
+        {{ _self.field('text', customer.address|default(''), 'address', 'Casablanca Massirra 40', 'Address', customer, ' minlength="6"') }}
+       
+        {{ _self.field('number', customer.zip|default(''), 'zip', '41 152', 'Zip(Postal Code)', customer, ' minlength="2"') }}
+    
+        <div class="form-group mt-2 text-center">
+            <button style="{{ 'background-color: #00457C; color: white; font-weight: bold; display: ' ~ (customer ? 'none;' : 'inline;')}}"
+             type="submit" class="btn">
+                <i class="fas fa-save"></i>
+                Save My Data
+            </button>
+        </div>
+    </form>
+{% endmacro %}
+
+{% macro field(type = 'text', value, id, holder, label, isRead, attrs) %}
+    <div class="form-group">
+        <label for="{{ id }}">{{ label }}</label>
+        <input type="{{ type }}" id="{{ id }}" name="{{ id }}" required="required" value="{{ value }}" 
+        class="form-control" placeholder="{{ holder }}"
+        
+        {% if isRead %}
+            readonly="true" style="background-color: lightgray;"
+        {% endif %}
+
+        {{ attrs }}
+        >
+    </div>
+{% endmacro %}

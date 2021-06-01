@@ -1,45 +1,111 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}
-    {{ product.name }}
+{% block title %} {{ product.name }} {% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('product-show') }}
 {% endblock %}
 
 {% block body %}
     <div class="container">
         <div class="card">
             <div class="card-header d-flex justify-content-between" style="background: lightgray;">
-                <h4 class="text-primary"> {{ product.name }} </h4>
-                <h4 class="font-weight-bolder text-primary">{{ product.price }} $</h4>
+                <h4 class="text-primary">
+                    {{ product.name }}
+                </h4>
+                <h4 class="font-weight-bolder text-primary">{{ product.price }} DH</h4>
             </div>
-            <div class="card-body row">
-                <div class="col-lg-6 card-media text-center">
-                    <img src="{{ product.image }}" alt="product.name" width="100%" height="100%">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card-media text-center">
+                            <img src="{{ asset('/uploads/products/' ~ product.id ~ '/' ~ product.image) }}" alt="product.name" width="100%" height="100%">
+                        </div>
+                        <div class="mt-2 border-primary border p-2">
+                            <div class="row">
+                                {% for img in product.images %}
+                                    <div class="col-3">
+                                        <span style="display: none;"><i class="fas fa-times"></i></span>
+                                        <img src="{{ asset('/uploads/products/' ~ product.id ~ '/' ~ img) }}" alt="{{ product.name }}" width="100%" height="100%" class="product-img">
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="card-content border border-2 p-2 rounded shadow-lg mb-2">
+                            {{ product.shortDescription }}
+                        </div>
+
+                        <div class="card-content border border-2 p-2 rounded shadow-lg mb-2">
+                            <b>Description:</b>
+                            {{ product.description }}
+                        </div>
+
+                        <div class="border border-2 p-2 rounded shadow-lg mb-2">
+                            <b>Category:</b>
+                            {{ product.category.title }}
+                        </div>
+                        <div class="border border-2 p-2 rounded shadow-lg mb-2">
+                            <b><i class="fas fa-tags"></i> Categroy Description: </b>
+                            {{ product.category.description }}
+                        </div>
+
+                        <div class="border border-2 p-2 rounded shadow-lg mb-2">
+                            <b><i class="fas fa-calculator"></i> Available Quantity :  </b>
+                            <span class="badge bg-primary">{{ product.availableQuantity }}</span>
+                        </div>
+
+                        <div class="border border-2 p-2 rounded shadow-lg mb-2">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <b> <i class="fas fa-thumbs-up"></i> Likes : </b>
+                                    <span class="badge bg-primary">{{ product.likes|length == 0 ? 'No likes': product.likes|length }}</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <b> <i class="fas fa-star-half-alt text-warning"></i> Rate : </b> 
+                                    {% set rate = product.stars / product.reviewsCount|default(1) %}
+                                    {% for item in range(1, 5) %}
+                                        {% if item > rate %}
+                                            <i class="fas fa-star"></i>
+                                        {% else %}
+                                            <i class="fas fa-star text-warning"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <small class="text-muted">{{ product.stars / product.reviewsCount|default(1) }}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                         <div class="border border-2 p-2 rounded shadow-lg mb-2">
+                            <b><i class="fas fa-shipping-fast"></i> Shipping : </b>
+                            {{ product.shipping|default('To All Morocco') }}
+                        </div>
+
+                         <div class="border border-2 p-2 rounded shadow-lg mb-2">
+                            <b><i class="fas fa-clock"></i> Shipping Time: </b>
+                            {{ product.shippingTime|default('3 days') }}
+                        </div>
+
+                        <div class="border border-2 p-2 rounded shadow-lg mb-2">
+                            <b> <i class="fas fa-history"></i> Created At : </b>
+                            {{ product.createdAt|date }}
+                        </div>
+                    </div>
                 </div>
-
-                <div class="col-lg-6">
-                    <div class="card-content border border-2 p-2 rounded shadow-lg mb-2">
-                        <b>Description:</b> {{ product.description }}
-                    </div>
-                    <div class="border border-2 p-2 rounded shadow-lg mb-2">
-                        <b>Category:</b> {{ product.category.title }}
-                    </div>
-                    <div class="border border-2 p-2 rounded shadow-lg mb-2">
-                        <b>Categroy Description: </b>{{ product.category.description }}
-                    </div>
-
-                    <div class="border border-2 p-2 rounded shadow-lg mb-2">
-                        <b>Available Quantity : </b> <span class="badge bg-primary">{{ product.availableQuantity }}</span>
-                    </div>
-
-                    <div class="border border-2 p-2 rounded shadow-lg mb-2">
-                        <b>Likes : </b> <span class="badge bg-primary">{{ product.likes|length == 0 ? 'No likes': product.likes|length }}</span>
-                    </div>
-    
-                    <div class="border border-2 p-2 rounded shadow-lg mb-2">
-                        <b>Created At : </b> {{ product.createdAt|date }}
-                    </div>
-                </div>
+            </div>
+            <div class="card-footer text-center" style="position: fixed; bottom:0; left:0; right:0; background: black;">
+                <a href="{{ path('cart', {order: true, id: product.id}) }}" class="btn btn-success">
+                    <i class="fas fa-credit-card text-warning"></i> Buy Now
+                </a>
+                <button class="btn btn-primary ml-2" id="js-add-product" data-product="{{ product.id }}"><i class="fas fa-cart-plus text-warning"></i> Add To Cart</button>
             </div>
         </div>
     </div>
+    {% block javascripts %}
+        {{ parent() }}
+        {{ encore_entry_script_tags('product-show') }}
+    {% endblock %}
 {% endblock %}

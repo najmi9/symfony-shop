@@ -1,46 +1,65 @@
+{% from "marcos/shippingDataForm.html.twig" import shippingDataForm %}
+
 {% extends 'base.html.twig' %}
 
 {% block title %} Pay with Paypal{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
-    <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD"></script>
+    {{ encore_entry_link_tags('paypal') }}
+    
+    <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_ID }}&currency=USD&disable-funding=card,credit"></script>
 {% endblock %}
 
 {% block body %}
 
-<div class="container d-flex justify-content-center align-items-center">
-    <div class="bg-light shadow-lg p-4 w-lg-50 rounded m-2 custom-form">
+<div class="container">
+    <div class="row gy-3">
+        <div class="col-sm-6">
+            <div class="shipping-card" style="box-shadow: lightgray 5px 5px 5px 5px; min-height: 510px;">
+                <div class="card-header">
+                    <div class="card-title">
+                        <h3 class="card-label" id="shipping-title">
+                           Your Shipping Information! 
+                           {% if customer %}
+                                <button class="btn btn-sm btn-primary" title="Edit" id="edit-user-info"><i class="fas fa-edit"></i></button>
+                           {% endif %}
+                        </h3>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {{ shippingDataForm(customer) }}
+                </div>
+            </div>
+        </div>
 
-        <div class="container bg-light">
-            <h1 class="text-center border-bottom mb-2">
-                Payment of
-                <span class="text-primary font-weight-bolder">
-                    {{ total|format_number() }} $
-                </span>
-            </h1>
+        <div class="col-sm-6" style="box-shadow: lightgray 5px 5px 5px 5px; min-height: 510px;">
+            <div class="mt-5">
+                <h2 class="text-center fw-bolder">Total: {{ total }} DHs</h2>
             <div class="text-center" id="paypal-button-container"></div>
+            </div>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block javascripts %}
-{{ parent() }}
-{{ encore_entry_script_tags('paypal') }}
-<script type="text/javascript">
-    paypal.Buttons({
-        style: {
-            layout: 'vertical',
-            color: 'blue',
-            shape: 'rect',
-            label: 'paypal',
-            size: 'responsive'
-        },
-        createOrder: () => createOrder(),
-        onApprove: (data, actions) => onApprove(data, actions),
-        onCancel: (data) => onCancel(data),
-        onError: (err) => onError(err)
-    }).render('#paypal-button-container'); // Display payment options on your web page
-</script>
+    {{ parent() }}
+    {{ encore_entry_script_tags('paypal') }}
+
+   <script type="text/javascript">
+        paypal.Buttons({
+            style: {
+                layout: 'vertical',
+                color: 'blue',
+                shape: 'rect',
+                label: 'paypal',
+                size: 'responsive'
+            },
+            createOrder: () => createOrder(),
+            onApprove: (data) => onApprove(data),
+            onCancel: (data) => onCancel(data),
+            onError: (err) => onError(err)
+        }).render('#paypal-button-container'); // Display payment options on your web page
+    </script>
 {% endblock %}

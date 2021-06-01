@@ -17,13 +17,13 @@
                 <th scope="col">Price</th>
                 <th scope="col">Quantity</th>
                 <th scope="col"> total </th>
-                <th scope="col">Actions</th>
+                <th scope="col"></th>
             </tr>
         </thead>
         <tbody>
             {% for product in products %}
             <tr>
-                <td> <img src="{{ product.image }}" width="50" height="50"> </td>
+                <td> <img src="{{ asset('/uploads/products/' ~ product.id ~ '/' ~ product.image) }}" width="50" height="50"> </td>
                 <th> {{ product.name }} </th>
                 <td>{{ product.price|format_number }} $</td>
                 <td> {{ cart[product.id] }} </td>
@@ -45,22 +45,25 @@
             </tr>
             {% endfor %}
         </tbody>
-        <footer>
-            <tr>
-                <td class="text-center" colspan="6">
-                    <a type="button" data-bs-toggle="tooltip" data-bs-placement="top" title="Pay With PayPal"
-                        href="{{ path("paypal_send_payment", {'total': total}) }}" class="btn btn-lg btn-primary">
-                        <i class="fab fa-paypal text-warning" text-secondary></i>Payer With Paypel
-                    </a>
-                    <button data-bs-toggle="tooltip" data-bs-placement="top" title="Pay With Stripe"
-                        class="btn btn-lg btn-success" id="checkout-button">
-                        <i class="fab fa-stripe text-danger" text-secondary></i>Payer With Stripe
-                    </button>
-                    Total : <span class="badge bg-success"> {{ total|format_number }} $ </span>
+        {% if total > 0 %}
+            <footer>
+                <tr>
+                    <td class="text-center" colspan="6">
+                        <a type="button" data-bs-toggle="tooltip" data-bs-placement="top" title="Pay With PayPal"
+                            href="{{ path("paypal_send_payment", {'total': total}) }}" class="btn btn-lg btn-primary">
+                            <i class="fab fa-paypal text-warning" text-secondary></i>Payer With Paypel
+                        </a>
 
-                </td>
-            </tr>
-        </footer>
+                        <button data-bs-toggle="tooltip" data-bs-placement="top" title="Pay With Stripe"
+                            class="btn btn-lg btn-success" id="checkout-button">
+                            <i class="fab fa-stripe text-danger" text-secondary></i>Payer With Stripe
+                        </button>
+
+                        Total : <span class="badge bg-success"> {{ total|format_number }} $ </span>
+                    </td>
+                </tr>
+            </footer>
+        {% endif %}
     </table>
 {% endblock %}
 
@@ -69,30 +72,32 @@
 {% block javascripts %}
     {{ parent() }}
     <script type="text/javascript">
-    const stripe = Stripe("{{ public_key }}");
+    (() => {
+        const stripe = Stripe("{{ public_key }}");
+        const checkoutButton = document.getElementById("checkout-button");
+        if (!checkoutButton) {
+            return;
+        }
 
-    const checkoutButton = document.getElementById("checkout-button");
-
-    checkoutButton.addEventListener("click", () => {
-
-        fetch("{{ path('create_checkout_session') }}", {
-            method: "POST",
-        })
-        .then(res => res.json())
-        .then(session => stripe.redirectToCheckout({ sessionId: session.id }))
-        .then((result) => {
-            console.log(result)
-            // If redirectToCheckout fails due to a browser or network
-            // error, you should display the localized error message to your
-            // customer using error.message.
-            if (result.error) {
-                alert(result.error.message);
-            }
-        })
-        .catch(function (error) {
-            console.error("Error:", error);
+        checkoutButton.addEventListener("click", () => {
+            fetch("{{ path('create_checkout_session') }}", {
+                method: "POST",
+            })
+            .then(res => res.json())
+            .then(session => stripe.redirectToCheckout({ sessionId: session.id }))
+            .then((result) => {
+                console.log(result)
+                // If redirectToCheckout fails due to a browser or network
+                // error, you should display the localized error message to your
+                // customer using error.message.
+                if (result.error) {
+                    alert(result.error.message);
+                }
+            })
+            .catch(function (error) {
+                console.error("Error:", error);
+            });
         });
-    });
-
+    })();
     </script>
 {% endblock %}

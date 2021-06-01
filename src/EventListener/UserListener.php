@@ -41,7 +41,7 @@ class UserListener
 
     public function postPersist(User $user): void
     {
-        $this->mailer->sendEmail(
+        /* $this->mailer->sendEmail(
             $user->getEmail(),
             'Symfony App - Email Confirmation',
             'security/emails/confirm_email.html.twig',
@@ -49,6 +49,6 @@ class UserListener
                 'username' => $user->getName(),
                 'token' => $user->getConfirmationToken(),
             ]
-        );
+        ); */
     }
 }

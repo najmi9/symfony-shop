@@ -72,6 +72,46 @@ class Product
      */
     private $availableQuantity = 10;
 
+    /**
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $isEnabled;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $originalPrice;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $shortDescription;
+
+    /**
+     * @ORM\Column(type="array", nullable=true)
+     */
+    private $images = [];
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $shipping;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $shippingTime;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $stars;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $reviewsCount;
+
     public function __construct()
     {
         $this->likes = new ArrayCollection();
@@ -242,6 +282,119 @@ class Product
     public function setAvailableQuantity(int $availableQuantity): self
     {
         $this->availableQuantity = $availableQuantity;
+
+        return $this;
+    }
+
+    public function getIsEnabled(): ?bool
+    {
+        return $this->isEnabled;
+    }
+
+    public function setIsEnabled(?bool $isEnabled): self
+    {
+        $this->isEnabled = $isEnabled;
+
+        return $this;
+    }
+
+    public function getOriginalPrice(): ?float
+    {
+        return $this->originalPrice;
+    }
+
+    public function setOriginalPrice(?float $originalPrice): self
+    {
+        $this->originalPrice = $originalPrice;
+
+        return $this;
+    }
+
+    public function getShortDescription(): ?string
+    {
+        return $this->shortDescription;
+    }
+
+    public function setShortDescription(?string $shortDescription): self
+    {
+        $this->shortDescription = $shortDescription;
+
+        return $this;
+    }
+
+    public function getImages(): ?array
+    {
+        return $this->images;
+    }
+
+    public function setImages(?array $images): self
+    {
+        $this->images = $images;
+
+        return $this;
+    }
+
+    public function addImage(string $image): self
+    {
+        $this->images[] = $image;
+
+        return $this;
+    }
+
+    public function removeImage(string $image): self
+    {
+        $key = array_search($image, $this->images);
+        if ($key !== false) {
+            unset($this->images[$key]);
+        }
+
+        return $this;
+    }
+
+    public function getShipping(): ?string
+    {
+        return $this->shipping;
+    }
+
+    public function setShipping(?string $shipping): self
+    {
+        $this->shipping = $shipping;
+
+        return $this;
+    }
+
+    public function getShippingTime(): ?string
+    {
+        return $this->shippingTime;
+    }
+
+    public function setShippingTime(?string $shippingTime): self
+    {
+        $this->shippingTime = $shippingTime;
+
+        return $this;
+    }
+
+    public function getStars(): ?float
+    {
+        return $this->stars;
+    }
+
+    public function setStars(?float $stars): self
+    {
+        $this->stars = $stars;
+
+        return $this;
+    }
+
+    public function getReviewsCount(): ?int
+    {
+        return $this->reviewsCount;
+    }
+
+    public function setReviewsCount(?int $reviewsCount): self
+    {
+        $this->reviewsCount = $reviewsCount;
 
         return $this;
     }

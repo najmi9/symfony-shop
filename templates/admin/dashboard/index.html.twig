@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello DashboardController!{% endblock %}
+
+{% block body %}
+
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-4">
+                    <div class="my-2 p-2 border">
+                        <a href="{{  path('admin_products_new') }}" class="btn btn-success">
+                            <i class="fas fa-plus"></i> New Product
+                        </a>
+                    </div>
+
+                    <div class="my-2 p-2 border">
+                        <a href="{{  path('admin_products_index') }}" class="btn btn-success">
+                            <i class="fas fa-tags"></i>Products
+                        </a>
+                    </div>
+
+                     <div class="my-2 p-2 border">
+                        <a href="{{  path('admin_orders_index') }}" class="btn btn-success">
+                            <i class="fas fa-cart-plus"></i>Orders
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

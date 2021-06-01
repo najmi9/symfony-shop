@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} Register{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                         <h3 class="card-label">Register Your Information!</h3>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form) }}
+                    {{ form_widget(form) }}
+                    <div class="form-group mt-2">
+                        <button class="btn btn-sm btn-success" type="submit">
+                            Save My Data
+                        </button>
+                    </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

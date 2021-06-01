@@ -6,11 +6,15 @@
 
 <div class="container">
 	{{ form_start(form) }}
-    {{ form_row(form.name) }}
-    {{ form_row(form.price) }}
-    {{ form_row(form.description) }}
-    {{ form_row(form.category) }}
-    	<button class="btn">Save</button>
+
+    {{ form_widget(form) }}
+    
+    <div class="form-group mt-2">
+        <button class="btn btn-sm btn-success">
+            <i class="fas fa-plus"></i> Save product
+        </button>
+    </div>
+
 	{{ form_end(form) }}
 </div>
 {% endblock %}

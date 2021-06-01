@@ -39,7 +39,7 @@ class Review
 
     /**
      * @ORM\ManyToOne(targetEntity=Product::class, inversedBy="reviews")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $product;
 

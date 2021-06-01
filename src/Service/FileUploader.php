@@ -4,76 +4,92 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\Entity\Product;
+use Symfony\Component\Filesystem\Exception\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-/**
- * Upload Pictures.
- */
 class FileUploader
 {
-    private string $productsDir;
+    const USERS_FOLDER = '/public/uploads/users';
+    const PRODUCTS_FOLDER = '/public/uploads/products/';
+
+    private string $projectDir;
     private SluggerInterface $slugger;
 
     public function __construct(string $projectDir, SluggerInterface $slugger)
     {
-        // .../public/uploads/products/{product}
-        $this->productsDir = $projectDir.'/public/uploads/products/{product}';
+        $this->projectDir = $projectDir;
         $this->slugger = $slugger;
     }
 
     /**
      * upload a picture and move to the right dirctory.
      */
-    public function uploadProductPicture(UploadedFile $file, int $id): string
+    public function uploadProductPicture(UploadedFile $file, string $id): string
     {
-        $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-        // this is needed to safely include the file name as part of the URL
-        $safeFilename = $this->slugger->slug($originalFilename);
-        $newFilename = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
+        return $this->uploadImage($file, $this->projectDir.self::PRODUCTS_FOLDER.$id, $this->safeName($file));
+    }
 
-        // Move the file to the directory where brochures are stored
+    public function deleteProductImage(string $id, string $image): void
+    {
+        $this->deleteImage($this->projectDir.self::PRODUCTS_FOLDER.$id.'/'.$image);
+    }
+
+    public function removeProductDir(string $id): void
+    {
         try {
-            $path = $this->getProductDir($id);
+            $dirPath = $this->projectDir.self::PRODUCTS_FOLDER.$id;
 
-            if (!file_exists($path)) {
-                mkdir($path, 0777, true);
+            if (!is_dir($dirPath)) {
+                throw new InvalidArgumentException("{$dirPath} must be a directory");
+            }
+            if ('/' !== substr($dirPath, \strlen($dirPath) - 1, 1)) {
+                $dirPath .= '/';
+            }
+            $files = glob($dirPath.'*', GLOB_MARK);
+            foreach ($files as $file) {
+                if (is_dir($file)) {
+                    $this->removeProductDir($file);
+                } else {
+                    unlink($file);
+                }
             }
 
-            $file->move(
-                $path,
-                $newFilename
-            );
+            rmdir($dirPath);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
+    private function uploadImage(UploadedFile $file, string $path, string $fileName): string
+    {
+        if (!file_exists($path)) {
+            mkdir($path, 0777, true);
+        }
+
+        try {
+            $file->move($path, $fileName);
         } catch (FileException $e) {
+            throw new FileException($e->getMessage());
         }
 
-        return $newFilename;
+        return $fileName;
     }
 
-    /**
-     * @parameter mixed[] $toDelete
-     */
-    public function deleteProductImage(int $productId, array $toDelete): void
-    {
-        $dir = str_replace(
-            ['{product}'],
-            [$productId],
-            $this->productsDir
-        );
 
-        if (file_exists($dir.$toDelete[0]['file'])) {
-            unlink($dir.$toDelete[0]['file']);
+    private function deleteImage(string $image): void
+    {
+        if (file_exists($image)) {
+            unlink($image);
         }
     }
 
-    private function getProductDir(int $id): string
+    private function safeName(UploadedFile $file): string
     {
-        return str_replace(
-            ['{product}'],
-            [$id],
-            $this->productsDir
-        );
+        $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $safeFilename = $this->slugger->slug($originalFilename);
+
+        return $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
     }
 }

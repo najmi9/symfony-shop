@@ -26,7 +26,7 @@ class Like
 
     /**
      * @ORM\ManyToOne(targetEntity=Product::class, inversedBy="likes")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $product;
 

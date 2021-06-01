@@ -14,6 +14,15 @@ Encore
     // only needed for CDN's or sub-directory deploy
     //.setManifestKeyPrefix('build/')
 
+    .copyFiles({
+        from: './assets/images/',
+        // optional target path, relative to the output dir
+        //to: '/keen/[path][name].[hash:8].[ext]',
+        // if versioning is enabled, add the file hash too
+        to: 'images/[path][name].[ext]',
+        // only copy files matching this pattern
+        //pattern: /\.(ttf|otf|eot|svg|woff(2)?)$/
+    })
     /*
      * ENTRY CONFIG
      *
@@ -23,6 +32,7 @@ Encore
     .addEntry('app', './assets/app.js')
     .addEntry('paypal', './assets/js/pages/paypal.js')
     .addEntry('home', './assets/js/pages/home.js')
+    .addEntry('product-show', './assets/js/pages/product.js')
     .addEntry('reports', './assets/js/pages/reports.js')
     .addEntry('error500', './assets/js/errors/error500.js')
     .addEntry('error404', './assets/js/errors/error404.js')

@@ -5,17 +5,15 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Repository\ProductRepository;
+use App\Service\Paypal\Payment;
 use App\Service\ProjectConstants;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class CartService
 {
-    private SessionInterface $session;
     private ProductRepository $productRepo;
 
-    public function __construct(SessionInterface $session, ProductRepository $productRepo)
+    public function __construct(ProductRepository $productRepo)
     {
-        $this->session = $session;
         $this->productRepo = $productRepo;
     }
 
@@ -32,7 +30,7 @@ class CartService
                // ]
                //
                 $totalCart[$key] = array_sum($value); // $totalCart[$key] = 7;
-            }else {
+            } else {
                 // 6 value from the database or the session
                 $totalCart[$key] = $value; // $totalCart[$key] = 6;
             }
@@ -41,10 +39,8 @@ class CartService
         return $totalCart;
     }
 
-    public function getData(): array
+    public function generatePayment(array $cart): Payment
     {
-        $cart = $this->session->get('cart', []);
-
         $products = $this->productRepo->findProductsById(array_keys($cart));
 
         $subtotal = 0;
@@ -68,15 +64,23 @@ class CartService
             $images[] = $product->getImage();
         }
 
-        $address = 'SET_PROVIDED_ADDRESS';
+        $payment = new Payment();
+
 
         $shippingPrice = ProjectConstants::SHIPPING_PRICE;
-        $currency = ProjectConstants::CURRENCY;
         $handlingPrice = ProjectConstants::HANDLINH_PRICE;
+
         $total = $subtotal + $shippingPrice + $handlingPrice;
 
-        $description = 'DESCRIPTION OF ORDER';
-
-        return compact('total', 'currency', 'items', 'images', 'handlingPrice', 'description', 'shippingPrice', 'address', 'subtotal');
+        return $payment->setAddress('SET_PROVIDED_ADDRESS')
+            ->setDescription('DESCRIPTION OF ORDER')
+            ->setCurrency(ProjectConstants::CURRENCY)
+            ->setHandlingPrice($handlingPrice)
+            ->setTotal($total)
+            ->setSubTotal($subtotal)
+            ->setShippingPrice($shippingPrice)
+            ->setItems($items)
+            ->setImages($images)
+        ;
     }
 }

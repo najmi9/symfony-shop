@@ -7,8 +7,7 @@ namespace App\Service;
 
 class ProjectConstants
 {
-	const SHIPPING_PRICE = 20;
-	const CURRENCY = 'USD';
-	const HANDLINH_PRICE  = 10;
-
+    const SHIPPING_PRICE = 0;
+    const CURRENCY = 'USD';
+    const HANDLINH_PRICE  = 0;
 }

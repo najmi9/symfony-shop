@@ -5,22 +5,32 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Service\FileUploader;
-use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Form\ProductType;
 use App\Entity\Product;
+use App\Repository\ProductRepository;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
+/**
+ * @Route("/admin/products", name="admin_products_")
+ */
 class ProductController extends AbstractController
 {
-    
     /**
-     * @Route("/product/new", name="product_new", methods={"GET","POST"})
+     * @Route("/", name="index", methods={"GET"})
+     */
+    public function index(ProductRepository $productRepo): Response
+    {
+        return $this->render('admin/product/index.html.twig', ['products' => $productRepo->findAll()]);
+    }
+
+    /**
+     * @Route("/new", name="new", methods={"GET","POST"})
      */
     public function new(Request $request, EntityManagerInterface $em): Response
     {
@@ -32,7 +42,7 @@ class ProductController extends AbstractController
             $em->persist($product);
             $em->flush();
 
-            return $this->redirectToRoute('upload_images', ['id' => $product->getId()]);
+            return $this->redirectToRoute('admin_products_upload_images', ['id' => $product->getId()]);
         }
 
         return $this->render('admin/product/new.html.twig', [
@@ -42,58 +52,105 @@ class ProductController extends AbstractController
     }
 
     /**
-     * @Route("/product/upload-images/{id}", name="upload_images", methods={"GET"})
+     * @Route("/upload-images/{id}", name="upload_images", methods={"GET"})
      */
-    public function uploadImages(string $id)
+    public function uploadImages(Product $product):Response
     {
        return $this->render('admin/product/upload_images.html.twig', [
-            'id' => $id,
+            'product' => $product,
         ]); 
     }
 
-    
      /**
      * @Route("/upload-image/{id}", name="upload_image", methods={"POST"})
      */
-    public function uploadImage(string $id=null, Request $request, FileUploader $fileUploader,
-     EntityManagerInterface $em, ProductRepository $productRepo)
+    public function uploadImage(Product $product, Request $request, FileUploader $fileUploader, EntityManagerInterface $em): JsonResponse
     {
-        /* $file = $request->files->get('file');
-        
-        $product = $productRepo->find($id);
+        $file = $request->files->get('file');
 
-        $images = $product->getImages() ?: [];
+        $image = $fileUploader->uploadProductPicture($file, $product->getId());
 
-        $fileName = $fileUploader->uploadProductPicture($file, $product->getCreatedAt()->getTimestamp());
+        $product->addImage($image);
 
-        if ($fileName) {
-            $images[] = $fileName;
-            $product->setImages($images);
-            $em->persist($product);
-            $em->flush();
-        }
+        $em->persist($product);
+        $em->flush();
 
         return $this->json([
             'message' => 'Succcess',
-        ], 201); */
+        ], 201);
     }
 
     /**
-     * @Route("/delete-image/{index}/product/{id}", name="delete_image", methods={"GET"})
+     * @Route("/upload-cover-image/{id}", name="upload_cover_image", methods={"POST"})
      */
-    public function deleteImages(int $id, int $index, FileUploader $fileUploader, 
-    EntityManagerInterface $em, ProductRepository $productRepo)
+    public function uploadCoverImage(Product $product, Request $request, FileUploader $fileUploader, EntityManagerInterface $em): JsonResponse
     {
-        /* $product = $productRepo->findOneById($id);
-        $images = $product->getImages();
-        $toDelete = array_splice($images, $index, 1);
-        $product->setImages($images);
-        $fileUploader->deleteProductImage($product->getCreatedAt()->getTimestamp(), $toDelete);
+        $file = $request->files->get('file');
+
+        if ($product->getImage()) {
+            $fileUploader->deleteProductImage($product->getId(), $product->getImage());
+        }
+
+        $image = $fileUploader->uploadProductPicture($file, $product->getId());
+
+        $product->setImage($image);
+
         $em->persist($product);
         $em->flush();
-        $this->addFlash('success', 'Image deleted Successfly.');
 
-        return $this->redirectToRoute('website_edit'); */
+        return $this->json([
+            'message' => 'Succcess',
+        ], 201);
     }
-    
+
+
+    /**
+     * @Route("/{id}/delete-image/{image}", name="delete_image", methods={"GET"})
+     */
+    public function deleteImage(Product $product, string $image, FileUploader $fileUploader, EntityManagerInterface $em): RedirectResponse
+    {
+        $product->removeImage($image);
+
+        $fileUploader->deleteProductImage($product->getId(), $image);
+        $em->persist($product);
+        $em->flush();
+        $this->addFlash('success', 'Product media deleted.');
+
+        return $this->redirectToRoute('admin_products_upload_images', ['id' => $product->getId()]);
+    }
+
+    /**
+     * @Route("/{id}/edit", name="edit", methods={"GET", "POST"})
+     */
+    public function edit(Product $product, EntityManagerInterface $em, Request $request): Response
+    {
+        $form = $this->createForm(ProductType::class, $product);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->persist($product);
+            $em->flush();
+
+            return $this->redirectToRoute('admin_products_upload_images', ['id' => $product->getId()]);
+        }
+
+        return $this->render('admin/product/new.html.twig', [
+            'product' => $product,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/{id}/delete", name="delete", methods={"GET"})
+     */
+    public function delete(Product $product, EntityManagerInterface $em, FileUploader $fileUploader): RedirectResponse
+    {
+        $fileUploader->removeProductDir($product->getId());
+        $em->remove($product);
+        $em->flush();
+
+        $this->addFlash('success', 'Product deleted.');
+
+        return $this->redirectToRoute('admin_products_index');
+    }
 }

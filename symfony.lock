@@ -1,4 +1,10 @@
 {
+    "async-aws/core": {
+        "version": "1.10.0"
+    },
+    "async-aws/ses": {
+        "version": "1.4.0"
+    },
     "beberlei/doctrineextensions": {
         "version": "v1.3.0"
     },
@@ -123,6 +129,12 @@
     "laminas/laminas-zendframework-bridge": {
         "version": "1.1.1"
     },
+    "lcobucci/clock": {
+        "version": "2.0.0"
+    },
+    "lcobucci/jwt": {
+        "version": "4.1.4"
+    },
     "mbezhanov/faker-provider-collection": {
         "version": "1.2.1"
     },
@@ -195,6 +207,18 @@
     "stripe/stripe-php": {
         "version": "v7.67.0"
     },
+    "symfony/amazon-mailer": {
+        "version": "4.4",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "4.4",
+            "ref": "9648db3ecae5c8a6b1a5f74715d3907124348815"
+        }
+    },
+    "symfony/amqp-messenger": {
+        "version": "v5.2.10"
+    },
     "symfony/apache-pack": {
         "version": "1.0",
         "recipe": {
@@ -257,6 +281,9 @@
     },
     "symfony/doctrine-bridge": {
         "version": "v5.2.1"
+    },
+    "symfony/doctrine-messenger": {
+        "version": "v5.2.10"
     },
     "symfony/dom-crawler": {
         "version": "v5.2.1"
@@ -362,6 +389,33 @@
             "ref": "fadbfe33303a76e25cb63401050439aa9b1a9c7f"
         }
     },
+    "symfony/mercure": {
+        "version": "v0.5.3"
+    },
+    "symfony/mercure-bundle": {
+        "version": "0.3",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "0.3",
+            "ref": "d1cdff3ae53bf6a5cbfb088c82f26032bdc14cc3"
+        },
+        "files": [
+            "config/packages/mercure.yaml"
+        ]
+    },
+    "symfony/messenger": {
+        "version": "4.3",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "4.3",
+            "ref": "e9a414b113ceadbf4e52abe37bf8f1b443f06ccb"
+        },
+        "files": [
+            "config/packages/messenger.yaml"
+        ]
+    },
     "symfony/mime": {
         "version": "v5.2.1"
     },
@@ -442,6 +496,9 @@
     },
     "symfony/property-info": {
         "version": "v5.2.1"
+    },
+    "symfony/redis-messenger": {
+        "version": "v5.2.10"
     },
     "symfony/routing": {
         "version": "5.1",
